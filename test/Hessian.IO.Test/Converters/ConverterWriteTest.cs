@@ -1,4 +1,5 @@
-﻿using Hessian.IO.Converters;
+﻿using com.caucho.model;
+using Hessian.IO.Converters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,8 @@ namespace Hessian.IO.Test.Converters
         public IntConverter IntConverter => new IntConverter();
         public LongConverter LongConverter => new LongConverter();
         public StringConverter StringConverter => new StringConverter();
+
+        public HessianContext Context { get; } = new HessianContext();
 
         [Fact]
         public void WriteBinary()
@@ -144,6 +147,16 @@ namespace Hessian.IO.Test.Converters
         }
 
         [Fact]
+        public void WriteObject()
+        {
+            Context.ObjectConverter.WriteValue(Writer, new Car("red", "corvette"));
+            ResetAndAssert("x43x14x63x6fx6dx2ex63x61x75x63x68x6fx2ex6dx6fx64x65x6cx2ex43x61x72x92x05x63x6fx6cx6fx72x05x6dx6fx64x65x6cx60x03x72x65x64x08x63x6fx72x76x65x74x74x65");
+
+            Context.ObjectConverter.WriteValue(Writer, new Car("green", "civic"));
+            ResetAndAssert("x60x05x67x72x65x65x6ex05x63x69x76x69x63");
+        }
+
+        [Fact]
         public void WriteString()
         {
             StringConverter.WriteValue(Writer, string.Empty);
@@ -156,10 +169,26 @@ namespace Hessian.IO.Test.Converters
             Assert.Matches("x33xff(x61){1023}", GetAndReset());
 
             StringConverter.WriteValue(Writer, new string('a', 1024 * 4));
-            Assert.Matches("x53x10xff(x61){4096}", GetAndReset());
+            Assert.Matches("x53x10x00(x61){4096}", GetAndReset());
 
             StringConverter.WriteValue(Writer, new string('a', 1024 * 4 + 31));
-            Assert.Matches("x53x10xff(x61){4096}x1f(x61){31}", GetAndReset());
+            Assert.Matches("x52x10x00(x61){4096}x1f(x61){31}", GetAndReset());
+        }
+
+        [Fact]
+        public void WriteType()
+        {
+            Context.TypeConverter.WriteValue(Writer, typeof(System.IO.FileInfo));
+            ResetAndAssert("x12x53x79x73x74x65x6dx2ex49x4fx2ex46x69x6cx65x49x6ex66x6f");
+
+            Context.TypeConverter.WriteValue(Writer, typeof(System.String));
+            ResetAndAssert("x0dx53x79x73x74x65x6dx2ex53x74x72x69x6ex67");
+
+            Context.TypeConverter.WriteValue(Writer, typeof(System.IO.FileInfo));
+            ResetAndAssert("x90");
+
+            Context.TypeConverter.WriteValue(Writer, typeof(System.String));
+            ResetAndAssert("x91");
         }
     }
 }

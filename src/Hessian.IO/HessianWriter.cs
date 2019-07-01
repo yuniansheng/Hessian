@@ -323,7 +323,7 @@ namespace Hessian.IO
                 throw new ArgumentNullException(nameof(value));
 
             int len = _encoding.GetByteCount(value);
-            Write7BitEncodedInt(len);
+            //Write7BitEncodedInt(len);
 
             if (_largeByteBuffer == null)
             {

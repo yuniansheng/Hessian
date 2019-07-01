@@ -47,6 +47,11 @@ namespace Hessian.IO
         public const int LONG_INT_MAX = 0x7fffffff;
         public const byte BC_LONG_INT = 0x59;
 
+        public const byte BC_OBJECT = (byte)'O';
+        public const byte BC_OBJECT_DEF = (byte)'C';
+        public const byte BC_OBJECT_DIRECT = 0x60;
+        public const int OBJECT_DIRECT_MAX = 0x0f;
+
         public const byte BC_STRING = (byte)'S'; // final string
         public const byte BC_STRING_CHUNK = (byte)'R'; // non-final string
         public const int STRING_CHUNK_SIZE = 1024 * 4;
