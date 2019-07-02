@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Hessian.IO.Converters
 {
-    public class TypeConverter : HessianConverter
+    public class AutoConverter : HessianConverter
     {
         public override object ReadValue(HessianReader reader, Type objectType)
         {
@@ -14,18 +14,17 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, object value)
         {
-            Type t = (Type)value;
-
-            (int index, bool isNewItem) = Context.TypeRefs.AddItem(t);
-
-            if (isNewItem)
+            if (value == null)
             {
-                Context.StringConverter.WriteValue(writer, t.FullName);
+                writer.Write(Constants.BC_NULL);
+                return;
             }
-            else
+
+            var t = value.GetType();
+            if (t.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                Context.IntConverter.WriteValue(writer, index);
-            }
+                
+            }            
         }
     }
 }

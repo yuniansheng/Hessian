@@ -6,8 +6,8 @@ namespace Hessian.IO
 {
     public class ReferenceMap<T>
     {
-        public List<T> _list = new List<T>();
-        public Dictionary<T, int> _dict = new Dictionary<T, int>();
+        private List<T> _list = new List<T>();
+        private Dictionary<T, int> _dict = new Dictionary<T, int>();
 
         ///// <summary>
         ///// add item to the map or return index of an already existed item
@@ -33,6 +33,12 @@ namespace Hessian.IO
                 _list.Add(value);
                 return (index, true);
             }
+        }
+
+        public void Clear()
+        {
+            _list.Clear();
+            _dict.Clear();
         }
 
         public T GetItem(int index)

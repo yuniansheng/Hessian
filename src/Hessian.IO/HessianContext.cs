@@ -16,6 +16,11 @@ namespace Hessian.IO
         public StringConverter StringConverter { get; }
         public TypeConverter TypeConverter { get; }
         public ObjectConverter ObjectConverter { get; }
+        public MapConverter MapConverter { get; }
+        public ListConverter ListConverter { get; }
+
+        public ReferenceMap<Type> TypeRefs { get; } = new ReferenceMap<Type>();
+        public ReferenceMap<Type> ClassRefs { get; } = new ReferenceMap<Type>();
 
         public HessianContext()
         {
@@ -28,6 +33,8 @@ namespace Hessian.IO
             StringConverter = new StringConverter() { Context = this };
             TypeConverter = new TypeConverter() { Context = this };
             ObjectConverter = new ObjectConverter { Context = this };
+            MapConverter = new MapConverter { Context = this };
+            ListConverter = new ListConverter { Context = this };
         }
     }
 }

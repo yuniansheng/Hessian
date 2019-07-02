@@ -90,6 +90,13 @@ namespace Hessian.IO.Test.Converters
             IntConverter.WriteValue(Writer, -16);
             ResetAndAssert("x80");
 
+            IntConverter.WriteValue(Writer, 1);
+            ResetAndAssert("x91");
+            IntConverter.WriteValue(Writer, 16);
+            ResetAndAssert("xa0");
+            IntConverter.WriteValue(Writer, 256);
+            ResetAndAssert("xc9x00");
+
             IntConverter.WriteValue(Writer, 47);
             ResetAndAssert("xbf");
 
@@ -144,6 +151,53 @@ namespace Hessian.IO.Test.Converters
 
             LongConverter.WriteValue(Writer, long.MaxValue);
             ResetAndAssert("x4cx7fxffxffxffxffxffxffxff");
+        }
+
+        [Fact]
+        public void WriteList()
+        {
+            string stringType = "x0dx53x79x73x74x65x6dx2ex53x74x72x69x6ex67";
+
+            //variable-length list
+            var list = new List<string> { "ab", "ab" };
+            Context.ListConverter.WriteValue(Writer, list);
+            Assert.Matches($"55{stringType}(x02x61x62){{2}}x5a", GetAndReset());
+            Context.TypeRefs.Clear();
+
+            //variable-length untyped list
+            var untypedList = new List<object> { "ab", "ab" };
+            Context.ListConverter.WriteValue(Writer, untypedList);
+            Assert.Matches($"x57(x02x61x62){{2}}x5a", GetAndReset());
+
+            //fixed-length list
+            var fixedList = new string[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
+            Context.ListConverter.WriteValue(Writer, fixedList);
+            Assert.Matches($"x56{stringType}x98(x02x61x62){{8}}", GetAndReset());
+            Context.TypeRefs.Clear();
+            //fixed-length short list
+            var fixedShortList = new string[] { "ab", "ab" };
+            Context.ListConverter.WriteValue(Writer, fixedShortList);
+            Assert.Matches($"x72{stringType}(x02x61x62){{2}}", GetAndReset());
+            Context.TypeRefs.Clear();
+
+            //fixed-length untyped list
+            var fixedUntypedList = new object[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
+            Context.ListConverter.WriteValue(Writer, fixedUntypedList);
+            Assert.Matches($"x58x98(x02x61x62){{8}}", GetAndReset());
+            Context.TypeRefs.Clear();
+            //fixed-length short list
+            var fixedUntypedShortList = new object[] { "ab", "ab" };
+            Context.ListConverter.WriteValue(Writer, fixedUntypedShortList);
+            Assert.Matches($"x7a(x02x61x62){{2}}", GetAndReset());
+            Context.TypeRefs.Clear();
+        }
+
+        [Fact]
+        public void WriteMap()
+        {
+            var dict = new Dictionary<int, string> { { 1, "fee" }, { 16, "fie" }, { 256, "foe" } };
+            Context.MapConverter.WriteValue(Writer, dict);
+            ResetAndAssert("x48x91x03x66x65x65xa0x03x66x69x65xc9x00x03x66x6fx65x5a");
         }
 
         [Fact]

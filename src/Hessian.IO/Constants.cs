@@ -33,6 +33,14 @@ namespace Hessian.IO
         public const int INT_SHORT_MAX = 0x3ffff;
         public const byte BC_INT_SHORT_ZERO = 0xd4;
 
+        public const byte BC_LIST_VARIABLE = 0x55;
+        public const byte BC_LIST_VARIABLE_UNTYPED = 0x57;
+        public const byte BC_LIST_FIXED = (byte)'V';
+        public const byte BC_LIST_FIXED_UNTYPED = 0x58;
+        public const byte BC_LIST_DIRECT = 0x70;
+        public const byte BC_LIST_DIRECT_UNTYPED = 0x78;
+        public const int LIST_DIRECT_MAX = 0x7;
+
         public const byte BC_LONG = (byte)'L'; // 64-bit signed integer
         public const int LONG_DIRECT_MIN = -0x08;
         public const int LONG_DIRECT_MAX = 0x0f;
@@ -47,6 +55,11 @@ namespace Hessian.IO
         public const int LONG_INT_MAX = 0x7fffffff;
         public const byte BC_LONG_INT = 0x59;
 
+        public const byte BC_MAP = (byte)'M';
+        public const byte BC_MAP_UNTYPED = (byte)'H';
+
+        public const byte BC_NULL = (byte)'N';
+
         public const byte BC_OBJECT = (byte)'O';
         public const byte BC_OBJECT_DEF = (byte)'C';
         public const byte BC_OBJECT_DIRECT = 0x60;
@@ -59,5 +72,7 @@ namespace Hessian.IO
         public const int STRING_DIRECT_MAX = 0x1f;
         public const byte BC_STRING_SHORT = 0x30;
         public const int STRING_SHORT_MAX = 0x3ff;
+
+        public const byte BC_END = (byte)'Z';
     }
 }

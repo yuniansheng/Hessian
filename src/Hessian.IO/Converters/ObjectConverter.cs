@@ -8,7 +8,6 @@ namespace Hessian.IO.Converters
 {
     public class ObjectConverter : HessianConverter
     {
-        private ReferenceMap<Type> _classRefs = new ReferenceMap<Type>();
         private Dictionary<Type, List<PropertyInfo>> _propertiesCache = new Dictionary<Type, List<PropertyInfo>>();
 
         public override object ReadValue(HessianReader reader, Type objectType)
@@ -19,7 +18,7 @@ namespace Hessian.IO.Converters
         public override void WriteValue(HessianWriter writer, object value)
         {
             Type t = value.GetType();
-            (var index, var isNewItem) = _classRefs.AddItem(t);
+            (var index, var isNewItem) = Context.ClassRefs.AddItem(t);
 
             if (isNewItem)
             {
