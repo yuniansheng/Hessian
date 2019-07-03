@@ -14,7 +14,21 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, object value)
         {
-            double v = (double)value;
+            var type = value.GetType();
+            double v = 0;
+            if (type == typeof(double))
+            {
+                v = (double)value;
+            }
+            else if (type == typeof(float))
+            {
+                v = Convert.ToDouble(value);
+            }
+            else
+            {
+                throw Exceptions.UnExpectedTypeException(type);
+            }
+
             int intValue = (int)v;
 
             if (intValue == v)

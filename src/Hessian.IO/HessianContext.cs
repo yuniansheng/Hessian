@@ -7,34 +7,42 @@ namespace Hessian.IO
 {
     public class HessianContext
     {
-        public BinaryConverter BinaryConverter { get; }
-        public BoolConverter BoolConverter { get; }
-        public DateTimeConverter DateTimeConverter { get; }
-        public DoubleConverter DoubleConverter { get; }
-        public IntConverter IntConverter { get; }
-        public LongConverter LongConverter { get; }
-        public StringConverter StringConverter { get; }
-        public TypeConverter TypeConverter { get; }
-        public ObjectConverter ObjectConverter { get; }
-        public MapConverter MapConverter { get; }
-        public ListConverter ListConverter { get; }
+        private Dictionary<Type, HessianConverter> _converterCache = new Dictionary<Type, HessianConverter>();
 
-        public ReferenceMap<Type> TypeRefs { get; } = new ReferenceMap<Type>();
-        public ReferenceMap<Type> ClassRefs { get; } = new ReferenceMap<Type>();
+        public BinaryConverter BinaryConverter => GetConverter<BinaryConverter>();
+        public BoolConverter BoolConverter => GetConverter<BoolConverter>();
+        public DateTimeConverter DateTimeConverter => GetConverter<DateTimeConverter>();
+        public DoubleConverter DoubleConverter => GetConverter<DoubleConverter>();
+        public IntConverter IntConverter => GetConverter<IntConverter>();
+        public LongConverter LongConverter => GetConverter<LongConverter>();
+        public StringConverter StringConverter => GetConverter<StringConverter>();
+        public TypeConverter TypeConverter => GetConverter<TypeConverter>();
+        public ObjectConverter ObjectConverter => GetConverter<ObjectConverter>();
+        public EnumConverter EnumConverter => GetConverter<EnumConverter>();
+        public MapConverter MapConverter => GetConverter<MapConverter>();
+        public ArrayConverter ArrayConverter => GetConverter<ArrayConverter>();
+        public ListConverter ListConverter => GetConverter<ListConverter>();
+        public AutoConverter AutoConverter => GetConverter<AutoConverter>();
+
+        public ReferenceMap<Type> TypeRefs { get; set; } = new ReferenceMap<Type>();
+        public ReferenceMap<Type> ClassRefs { get; set; } = new ReferenceMap<Type>();
 
         public HessianContext()
         {
-            BinaryConverter = new BinaryConverter() { Context = this };
-            BoolConverter = new BoolConverter() { Context = this };
-            DateTimeConverter = new DateTimeConverter() { Context = this };
-            DoubleConverter = new DoubleConverter() { Context = this };
-            IntConverter = new IntConverter() { Context = this };
-            LongConverter = new LongConverter() { Context = this };
-            StringConverter = new StringConverter() { Context = this };
-            TypeConverter = new TypeConverter() { Context = this };
-            ObjectConverter = new ObjectConverter { Context = this };
-            MapConverter = new MapConverter { Context = this };
-            ListConverter = new ListConverter { Context = this };
+        }
+
+        public T GetConverter<T>() where T : HessianConverter
+        {
+            HessianConverter converter = null;
+            var type = typeof(T);
+
+            if (!_converterCache.TryGetValue(typeof(T), out converter))
+            {
+                converter = Activator.CreateInstance<T>();
+                type.GetProperty(nameof(HessianConverter.Context)).SetValue(converter, this);
+                _converterCache.Add(typeof(T), converter);
+            }
+            return (T)converter;
         }
     }
 }

@@ -14,32 +14,52 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, object value)
         {
-            long v = (long)value;
+            var type = value.GetType();
+            var typeCode = Type.GetTypeCode(type);
+            switch (typeCode)
+            {
+                case TypeCode.Int64:
+                    WriteLong(writer, (long)value);
+                    break;
+                case TypeCode.UInt64:
+                    WriteULong(writer, (ulong)value);
+                    break;
+                default:
+                    throw Exceptions.UnExpectedTypeException(type);
+            }
+        }
 
-            if (Constants.LONG_DIRECT_MIN <= v && v <= Constants.LONG_DIRECT_MAX)
+        public void WriteLong(HessianWriter writer, long value)
+        {
+            if (Constants.LONG_DIRECT_MIN <= value && value <= Constants.LONG_DIRECT_MAX)
             {
-                writer.Write((byte)(Constants.BC_LONG_ZERO + v));
+                writer.Write((byte)(Constants.BC_LONG_ZERO + value));
             }
-            else if (Constants.LONG_BYTE_MIN <= v && v <= Constants.LONG_BYTE_MAX)
+            else if (Constants.LONG_BYTE_MIN <= value && value <= Constants.LONG_BYTE_MAX)
             {
-                writer.Write((byte)(Constants.BC_LONG_BYTE_ZERO + (v >> 8)));
-                writer.Write((byte)v);
+                writer.Write((byte)(Constants.BC_LONG_BYTE_ZERO + (value >> 8)));
+                writer.Write((byte)value);
             }
-            else if (Constants.LONG_SHORT_MIN <= v && v <= Constants.LONG_SHORT_MAX)
+            else if (Constants.LONG_SHORT_MIN <= value && value <= Constants.LONG_SHORT_MAX)
             {
-                writer.Write((byte)(Constants.BC_LONG_SHORT_ZERO + (v >> 16)));
-                writer.Write((short)v);
+                writer.Write((byte)(Constants.BC_LONG_SHORT_ZERO + (value >> 16)));
+                writer.Write((short)value);
             }
-            else if (Constants.LONG_INT_MIN <= v && v <= Constants.LONG_INT_MAX)
+            else if (Constants.LONG_INT_MIN <= value && value <= Constants.LONG_INT_MAX)
             {
                 writer.Write((byte)(Constants.BC_LONG_INT));
-                writer.Write((int)v);
+                writer.Write((int)value);
             }
             else
             {
                 writer.Write(Constants.BC_LONG);
-                writer.Write(v);
+                writer.Write(value);
             }
+        }
+
+        public void WriteULong(HessianWriter writer, ulong value)
+        {
+            WriteLong(writer, unchecked((long)value));
         }
     }
 }

@@ -14,13 +14,18 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, object value)
         {
-            Type t = (Type)value;
+            if (!(value is Type))
+            {
+                throw Exceptions.UnExpectedTypeException(value.GetType());
+            }
 
-            (int index, bool isNewItem) = Context.TypeRefs.AddItem(t);
+            Type type = (Type)value;
+
+            (int index, bool isNewItem) = Context.TypeRefs.AddItem(type);
 
             if (isNewItem)
             {
-                Context.StringConverter.WriteValue(writer, t.FullName);
+                Context.StringConverter.WriteValue(writer, type.FullName);
             }
             else
             {

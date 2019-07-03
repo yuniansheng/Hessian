@@ -73,6 +73,9 @@ namespace Hessian.IO
         public const byte BC_STRING_SHORT = 0x30;
         public const int STRING_SHORT_MAX = 0x3ff;
 
+        public const byte BC_TRUE = (byte)'T';
+        public const byte BC_FALSE = (byte)'F';
+
         public const byte BC_END = (byte)'Z';
     }
 }

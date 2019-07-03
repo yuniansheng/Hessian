@@ -14,14 +14,20 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, object value)
         {
+            var type = value.GetType();
+            if (type != typeof(bool))
+            {
+                throw Exceptions.UnExpectedTypeException(type);
+            }
+
             bool b = (bool)value;
             if (b)
             {
-                writer.Write('T');
+                writer.Write(Constants.BC_TRUE);
             }
             else
             {
-                writer.Write('F');
+                writer.Write(Constants.BC_FALSE);
             }
         }
     }

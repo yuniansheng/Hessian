@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hessian.IO.Properties;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -11,6 +12,6 @@ namespace Hessian.IO.Converters
 
         public abstract object ReadValue(HessianReader reader, Type objectType);
 
-        public abstract void WriteValue(HessianWriter writer, object value);
+        public abstract void WriteValue(HessianWriter writer, object value);        
     }
 }

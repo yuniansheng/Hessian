@@ -20,9 +20,10 @@ namespace Hessian.IO.Converters
             Type t = value.GetType();
             (var index, var isNewItem) = Context.ClassRefs.AddItem(t);
 
+            var properties = LoadProperties(t);
             if (isNewItem)
             {
-                WriteClassDefinition(writer, t);
+                WriteClassDefinition(writer, t, properties);
             }
 
             if (index <= Constants.OBJECT_DIRECT_MAX)
@@ -35,7 +36,6 @@ namespace Hessian.IO.Converters
                 writer.Write(index);
             }
 
-            var properties = _propertiesCache[t];
             foreach (var property in properties)
             {
                 object propertyValue = property.GetValue(value);
@@ -43,12 +43,11 @@ namespace Hessian.IO.Converters
             }
         }
 
-        private void WriteClassDefinition(HessianWriter writer, Type type)
+        private void WriteClassDefinition(HessianWriter writer, Type type, List<PropertyInfo> properties)
         {
             writer.Write(Constants.BC_OBJECT_DEF);
             Context.StringConverter.WriteValue(writer, type.FullName);
 
-            var properties = GetProperties(type);
             Context.IntConverter.WriteValue(writer, properties.Count);
 
             foreach (var property in properties)
@@ -57,7 +56,7 @@ namespace Hessian.IO.Converters
             }
         }
 
-        private List<PropertyInfo> GetProperties(Type type)
+        private List<PropertyInfo> LoadProperties(Type type)
         {
             List<PropertyInfo> list;
             if (!_propertiesCache.TryGetValue(type, out list))

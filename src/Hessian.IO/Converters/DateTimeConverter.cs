@@ -16,6 +16,12 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, object value)
         {
+            var type = value.GetType();
+            if (type != typeof(DateTime))
+            {
+                throw Exceptions.UnExpectedTypeException(type);
+            }
+
             DateTime time = (DateTime)value;
             if (time.Kind == DateTimeKind.Unspecified)
             {

@@ -16,73 +16,44 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, object value)
         {
-            Type t = value.GetType();
-            if (t.IsArray)
+            Type type = value.GetType();
+            if (type == typeof(ArrayList))
             {
-                WriteArray(writer, t, (Array)value);
-            }
-            else
-            {
-                WriteList(writer, t, value);
-            }
-        }
-
-        private void WriteArray(HessianWriter writer, Type t, Array array)
-        {
-            if (t.GetElementType() == typeof(object))
-            {
-                //untyped array
-                if (array.Length <= Constants.LIST_DIRECT_MAX)
-                {
-                    writer.Write((byte)(Constants.BC_LIST_DIRECT_UNTYPED + array.Length));
-                }
-                else
-                {
-                    writer.Write(Constants.BC_LIST_FIXED_UNTYPED);
-                    Context.IntConverter.WriteValue(writer, array.Length);
-                }
-            }
-            else
-            {
-                if (array.Length <= Constants.LIST_DIRECT_MAX)
-                {
-                    writer.Write((byte)(Constants.BC_LIST_DIRECT + array.Length));
-                    Context.TypeConverter.WriteValue(writer, t.GetElementType());
-                }
-                else
-                {
-                    writer.Write(Constants.BC_LIST_FIXED);
-                    Context.TypeConverter.WriteValue(writer, t.GetElementType());
-                    Context.IntConverter.WriteValue(writer, array.Length);
-                }
-            }
-
-            foreach (var item in array)
-            {
-                Context.StringConverter.WriteValue(writer, item);
-            }
-        }
-
-        private void WriteList(HessianWriter writer, Type t, object value)
-        {
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(List<>) && t.GenericTypeArguments[0] != typeof(object))
-            {
-                writer.Write(Constants.BC_LIST_VARIABLE);
-                var itemType = t.GenericTypeArguments[0];
-                Context.TypeConverter.WriteValue(writer, itemType);
-            }
-            else
-            {
-                //ArrayList
                 writer.Write(Constants.BC_LIST_VARIABLE_UNTYPED);
+            }
+            else if (IsGenericList(type))
+            {
+                var itemType = type.GenericTypeArguments[0];
+                if (itemType == typeof(object))
+                {
+                    writer.Write(Constants.BC_LIST_VARIABLE_UNTYPED);
+                }
+                else
+                {
+                    writer.Write(Constants.BC_LIST_VARIABLE);
+                    Context.TypeConverter.WriteValue(writer, itemType);
+                }
+            }
+            else
+            {
+                throw Exceptions.UnExpectedTypeException(type);
             }
 
             foreach (var item in (IEnumerable)value)
             {
                 Context.StringConverter.WriteValue(writer, item);
             }
-
             writer.Write(Constants.BC_END);
+        }
+
+        public bool IsList(Type type)
+        {
+            return type == typeof(ArrayList) || IsGenericList(type);
+        }
+
+        private bool IsGenericList(Type type)
+        {
+            return type.IsGenericType && typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition());
         }
     }
 }
