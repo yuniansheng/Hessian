@@ -16,6 +16,7 @@ namespace Hessian.IO.Test.Converters
         {
             Stream = new MemoryStream();
             Serializer = new HessianSerializer();
+            Serializer.AutoReset = true;
         }
 
         public void ResetAndAssert(string expected)

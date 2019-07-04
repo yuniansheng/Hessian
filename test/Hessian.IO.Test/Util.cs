@@ -17,5 +17,15 @@ namespace Hessian.IO.Test
             }
             return builder.ToString();
         }
+
+        public static string ToHexString(this byte[] buffer)
+        {
+            var builder = new StringBuilder(buffer.Length * 3);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                builder.Append(string.Format("x{0:x2}", buffer[i]));
+            }
+            return builder.ToString();
+        }
     }
 }

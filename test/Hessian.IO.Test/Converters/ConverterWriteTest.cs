@@ -152,7 +152,6 @@ namespace Hessian.IO.Test.Converters
             var list = new List<string> { "ab", "ab" };
             Serializer.Serialize(Stream, list);
             Assert.Matches($"55{stringType}(x02x61x62){{2}}x5a", GetAndReset());
-            Serializer.Reset();
 
             //variable-length untyped list
             var untypedList = new List<object> { "ab", "ab" };
@@ -163,29 +162,28 @@ namespace Hessian.IO.Test.Converters
         [Fact]
         public void WriteArray()
         {
-            string stringType = "x0dx53x79x73x74x65x6dx2ex53x74x72x69x6ex67";
+            var stringType = Serializer.Serialize(typeof(string)).ToHexString();
+            var ab = Serializer.Serialize("ab").ToHexString();
 
             //fixed-length list
             var fixedList = new string[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
             Serializer.Serialize(Stream, fixedList);
-            Assert.Matches($"x56{stringType}x98(x02x61x62){{8}}", GetAndReset());
-            Serializer.Reset();
+            Assert.Matches($"x56{stringType}x98({ab}){{8}}", GetAndReset());
+
             //fixed-length short list
             var fixedShortList = new string[] { "ab", "ab" };
             Serializer.Serialize(Stream, fixedShortList);
-            Assert.Matches($"x72{stringType}(x02x61x62){{2}}", GetAndReset());
-            Serializer.Reset();
+            Assert.Matches($"x72{stringType}({ab}){{2}}", GetAndReset());
 
             //fixed-length untyped list
             var fixedUntypedList = new object[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
             Serializer.Serialize(Stream, fixedUntypedList);
-            Assert.Matches($"x58x98(x02x61x62){{8}}", GetAndReset());
-            Serializer.Reset();
+            Assert.Matches($"x58x98({ab}){{8}}", GetAndReset());
+
             //fixed-length short list
             var fixedUntypedShortList = new object[] { "ab", "ab" };
             Serializer.Serialize(Stream, fixedUntypedShortList);
-            Assert.Matches($"x7a(x02x61x62){{2}}", GetAndReset());
-            Serializer.Reset();
+            Assert.Matches($"x7a({ab}){{2}}", GetAndReset());
         }
 
         [Fact]
@@ -199,6 +197,7 @@ namespace Hessian.IO.Test.Converters
         [Fact]
         public void WriteObject()
         {
+            Serializer.AutoReset = false;
             Serializer.Serialize(Stream, new Car("red", "corvette"));
             ResetAndAssert("x43x14x63x6fx6dx2ex63x61x75x63x68x6fx2ex6dx6fx64x65x6cx2ex43x61x72x92x05x63x6fx6cx6fx72x05x6dx6fx64x65x6cx60x03x72x65x64x08x63x6fx72x76x65x74x74x65");
 
@@ -209,11 +208,12 @@ namespace Hessian.IO.Test.Converters
         [Fact]
         public void WriteEnum()
         {
-            Serializer.Serialize(Stream, DayOfWeek.Monday);
-            ResetAndAssert("x43x10x53x79x73x74x65x6dx2ex44x61x79x4fx66x57x65x65x6bx91x04x6ex61x6dx65x60x06x4dx6fx6ex64x61x79");
+            var type = Serializer.Serialize(typeof(DayOfWeek)).ToHexString();
+            var name = Serializer.Serialize("name").ToHexString();
+            var monday = Serializer.Serialize("Monday").ToHexString();
 
-            Serializer.Serialize(Stream, DayOfWeek.Friday);
-            ResetAndAssert("x60x06x46x72x69x64x61x79");
+            Serializer.Serialize(Stream, DayOfWeek.Monday);
+            ResetAndAssert($"x43{type}x91{name}x60{monday}");
         }
 
         [Fact]
@@ -238,16 +238,20 @@ namespace Hessian.IO.Test.Converters
         [Fact]
         public void WriteType()
         {
-            Serializer.Serialize(Stream, typeof(System.IO.FileInfo));
-            ResetAndAssert("x12x53x79x73x74x65x6dx2ex49x4fx2ex46x69x6cx65x49x6ex66x6f");
+            Serializer.AutoReset = false;
+            var fileInfoType = Serializer.Serialize("System.IO.FileInfo").ToHexString();
+            var stringType = Serializer.Serialize("System.String").ToHexString();
 
-            Serializer.Serialize(Stream, typeof(System.String));
-            ResetAndAssert("x0dx53x79x73x74x65x6dx2ex53x74x72x69x6ex67");
+            Serializer.Serialize(Stream, typeof(System.IO.FileInfo));
+            ResetAndAssert(fileInfoType);
+
+            Serializer.Serialize(Stream, typeof(string));
+            ResetAndAssert(stringType);
 
             Serializer.Serialize(Stream, typeof(System.IO.FileInfo));
             ResetAndAssert("x90");
 
-            Serializer.Serialize(Stream, typeof(System.String));
+            Serializer.Serialize(Stream, typeof(string));
             ResetAndAssert("x91");
         }
     }

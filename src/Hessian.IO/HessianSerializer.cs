@@ -10,6 +10,8 @@ namespace Hessian.IO
     {
         private HessianContext _context;
 
+        public bool AutoReset { get; set; }
+
         public HessianSerializer()
         {
             _context = new HessianContext();
@@ -25,6 +27,19 @@ namespace Hessian.IO
             using (var writer = new HessianWriter(stream, new UTF8Encoding(false, true), true))
             {
                 HessianConverter.AutoConverter.WriteValue(writer, _context, value);
+                if (AutoReset)
+                {
+                    Reset();
+                }
+            }
+        }
+
+        public byte[] Serialize(object value)
+        {
+            using (var stream = new MemoryStream())
+            {
+                Serialize(stream, value);
+                return stream.ToArray();
             }
         }
 
