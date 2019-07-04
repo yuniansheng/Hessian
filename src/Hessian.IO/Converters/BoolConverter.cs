@@ -7,12 +7,12 @@ namespace Hessian.IO.Converters
 {
     public class BoolConverter : HessianConverter
     {
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             var type = value.GetType();
             if (type != typeof(bool))

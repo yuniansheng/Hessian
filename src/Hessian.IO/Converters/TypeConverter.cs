@@ -7,12 +7,12 @@ namespace Hessian.IO.Converters
 {
     public class TypeConverter : HessianConverter
     {
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             if (!(value is Type))
             {
@@ -21,15 +21,15 @@ namespace Hessian.IO.Converters
 
             Type type = (Type)value;
 
-            (int index, bool isNewItem) = Context.TypeRefs.AddItem(type);
+            (int index, bool isNewItem) = context.TypeRefs.AddItem(type);
 
             if (isNewItem)
             {
-                Context.StringConverter.WriteValue(writer, type.FullName);
+                StringConverter.WriteValue(writer, context, type.FullName);
             }
             else
             {
-                Context.IntConverter.WriteValue(writer, index);
+                IntConverter.WriteValue(writer, context, index);
             }
         }
     }

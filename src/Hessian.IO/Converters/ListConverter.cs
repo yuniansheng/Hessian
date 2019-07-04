@@ -9,12 +9,12 @@ namespace Hessian.IO.Converters
 {
     public class ListConverter : HessianConverter
     {
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
             if (type == typeof(ArrayList))
@@ -31,7 +31,7 @@ namespace Hessian.IO.Converters
                 else
                 {
                     writer.Write(Constants.BC_LIST_VARIABLE);
-                    Context.TypeConverter.WriteValue(writer, itemType);
+                    TypeConverter.WriteValue(writer, context, itemType);
                 }
             }
             else
@@ -41,7 +41,7 @@ namespace Hessian.IO.Converters
 
             foreach (var item in (IEnumerable)value)
             {
-                Context.StringConverter.WriteValue(writer, item);
+                StringConverter.WriteValue(writer, context, item);
             }
             writer.Write(Constants.BC_END);
         }

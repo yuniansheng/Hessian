@@ -9,12 +9,12 @@ namespace Hessian.IO.Converters
     {
         public DateTime BeginDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             var type = value.GetType();
             if (type != typeof(DateTime))

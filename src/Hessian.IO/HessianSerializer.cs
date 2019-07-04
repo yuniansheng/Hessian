@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hessian.IO.Converters;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -7,7 +8,7 @@ namespace Hessian.IO
 {
     public class HessianSerializer
     {
-        public HessianContext _context;
+        private HessianContext _context;
 
         public HessianSerializer()
         {
@@ -21,10 +22,15 @@ namespace Hessian.IO
 
         public void Serialize(Stream stream, object value)
         {
-            using (var writer = new HessianWriter(stream))
+            using (var writer = new HessianWriter(stream, new UTF8Encoding(false, true), true))
             {
-                _context.AutoConverter.WriteValue(writer, value);
+                HessianConverter.AutoConverter.WriteValue(writer, _context, value);
             }
+        }
+
+        public void Reset()
+        {
+            _context.Reset();
         }
     }
 }

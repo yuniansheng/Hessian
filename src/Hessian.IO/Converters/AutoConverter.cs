@@ -8,12 +8,12 @@ namespace Hessian.IO.Converters
 {
     public class AutoConverter : HessianConverter
     {
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             if (value == null)
             {
@@ -21,9 +21,9 @@ namespace Hessian.IO.Converters
                 return;
             }
 
-            var t = value.GetType();
-            var converter = GetConverter(t);
-            converter.WriteValue(writer, value);
+            var type = value.GetType();
+            var converter = GetConverter(type);
+            converter.WriteValue(writer, context, value);
         }
 
         private HessianConverter GetConverter(Type type)
@@ -34,53 +34,57 @@ namespace Hessian.IO.Converters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        return Context.BoolConverter;
+                        return BoolConverter;
                     case TypeCode.Byte:
                     case TypeCode.SByte:
                     case TypeCode.Int16:
                     case TypeCode.UInt16:
                     case TypeCode.Int32:
                     case TypeCode.UInt32:
-                        return Context.IntConverter;
+                        return IntConverter;
                     case TypeCode.Double:
                     case TypeCode.Single:
-                        return Context.DoubleConverter;
+                        return DoubleConverter;
                     case TypeCode.Int64:
                     case TypeCode.UInt64:
-                        return Context.LongConverter;
+                        return LongConverter;
                     case TypeCode.Char:
-                        return Context.StringConverter;
+                        return StringConverter;
                     default:
-                        return Context.ObjectConverter;
+                        return ObjectConverter;
                 }
             }
             else if (type == typeof(string))
             {
-                return Context.StringConverter;
+                return StringConverter;
             }
             else if (type == typeof(DateTime))
             {
-                return Context.DateTimeConverter;
+                return DateTimeConverter;
             }
             else if (type.IsArray)
             {
-                return Context.ArrayConverter;
+                return ArrayConverter;
             }
             else if (type.IsEnum)
             {
-                return Context.EnumConverter;
+                return EnumConverter;
             }
-            else if (Context.ListConverter.IsList(type))
+            else if (type.FullName == "System.RuntimeType")
             {
-                return Context.ListConverter;
+                return TypeConverter;
             }
-            else if (Context.MapConverter.IsMap(type))
+            else if (ListConverter.IsList(type))
             {
-                return Context.MapConverter;
+                return ListConverter;
+            }
+            else if (MapConverter.IsMap(type))
+            {
+                return MapConverter;
             }
             else
             {
-                return Context.ObjectConverter;
+                return ObjectConverter;
             }
         }
     }

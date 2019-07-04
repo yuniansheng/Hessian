@@ -8,12 +8,14 @@ namespace Hessian.IO.Test.Converters
 {
     public class ConverterTestBase
     {
-        public HessianWriter Writer { get; set; }
+        public Stream Stream { get; set; }
+
+        public HessianSerializer Serializer { get; set; }
 
         public ConverterTestBase()
         {
-            var stream = new MemoryStream();
-            Writer = new HessianWriter(stream);
+            Stream = new MemoryStream();
+            Serializer = new HessianSerializer();
         }
 
         public void ResetAndAssert(string expected)
@@ -23,10 +25,9 @@ namespace Hessian.IO.Test.Converters
 
         public string GetAndReset()
         {
-            Writer.Flush();
-            Writer.BaseStream.Seek(0, SeekOrigin.Begin);
-            var content = Writer.BaseStream.ToHexString();
-            Writer.BaseStream.SetLength(0);
+            Stream.Seek(0, SeekOrigin.Begin);
+            var content = Stream.ToHexString();
+            Stream.SetLength(0);
             return content;
         }
     }

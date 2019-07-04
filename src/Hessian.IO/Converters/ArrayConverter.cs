@@ -9,12 +9,12 @@ namespace Hessian.IO.Converters
 {
     public class ArrayConverter : HessianConverter
     {
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
             if (!type.IsArray)
@@ -25,7 +25,8 @@ namespace Hessian.IO.Converters
             var elementType = type.GetElementType();
             if (elementType == typeof(byte) || elementType == typeof(sbyte))
             {
-                Context.BinaryConverter.WriteValue(writer, value);
+                BinaryConverter.WriteValue(writer, context, value);
+                return;
             }
 
             var array = (Array)value;
@@ -39,7 +40,7 @@ namespace Hessian.IO.Converters
                 else
                 {
                     writer.Write(Constants.BC_LIST_FIXED_UNTYPED);
-                    Context.IntConverter.WriteValue(writer, array.Length);
+                    IntConverter.WriteValue(writer, context, array.Length);
                 }
             }
             else
@@ -47,19 +48,19 @@ namespace Hessian.IO.Converters
                 if (array.Length <= Constants.LIST_DIRECT_MAX)
                 {
                     writer.Write((byte)(Constants.BC_LIST_DIRECT + array.Length));
-                    Context.TypeConverter.WriteValue(writer, elementType);
+                    TypeConverter.WriteValue(writer, context, elementType);
                 }
                 else
                 {
                     writer.Write(Constants.BC_LIST_FIXED);
-                    Context.TypeConverter.WriteValue(writer, elementType);
-                    Context.IntConverter.WriteValue(writer, array.Length);
+                    TypeConverter.WriteValue(writer, context, elementType);
+                    IntConverter.WriteValue(writer, context, array.Length);
                 }
             }
 
             foreach (var item in array)
             {
-                Context.StringConverter.WriteValue(writer, item);
+                StringConverter.WriteValue(writer, context, item);
             }
         }
     }

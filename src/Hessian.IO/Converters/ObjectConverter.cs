@@ -10,20 +10,20 @@ namespace Hessian.IO.Converters
     {
         private Dictionary<Type, List<PropertyInfo>> _propertiesCache = new Dictionary<Type, List<PropertyInfo>>();
 
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             Type t = value.GetType();
-            (var index, var isNewItem) = Context.ClassRefs.AddItem(t);
+            (var index, var isNewItem) = context.ClassRefs.AddItem(t);
 
             var properties = LoadProperties(t);
             if (isNewItem)
             {
-                WriteClassDefinition(writer, t, properties);
+                WriteClassDefinition(writer, context, t, properties);
             }
 
             if (index <= Constants.OBJECT_DIRECT_MAX)
@@ -39,20 +39,20 @@ namespace Hessian.IO.Converters
             foreach (var property in properties)
             {
                 object propertyValue = property.GetValue(value);
-                Context.StringConverter.WriteValue(writer, propertyValue);
+                StringConverter.WriteValue(writer, context, propertyValue);
             }
         }
 
-        private void WriteClassDefinition(HessianWriter writer, Type type, List<PropertyInfo> properties)
+        private void WriteClassDefinition(HessianWriter writer, HessianContext context, Type type, List<PropertyInfo> properties)
         {
             writer.Write(Constants.BC_OBJECT_DEF);
-            Context.StringConverter.WriteValue(writer, type.FullName);
+            StringConverter.WriteValue(writer, context, type.FullName);
 
-            Context.IntConverter.WriteValue(writer, properties.Count);
+            IntConverter.WriteValue(writer, context, properties.Count);
 
             foreach (var property in properties)
             {
-                Context.StringConverter.WriteValue(writer, property.Name);
+                StringConverter.WriteValue(writer, context, property.Name);
             }
         }
 

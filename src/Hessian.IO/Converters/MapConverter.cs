@@ -10,12 +10,12 @@ namespace Hessian.IO.Converters
 {
     public class MapConverter : HessianConverter
     {
-        public override object ReadValue(HessianReader reader, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, object value)
+        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
             if (!IsMap(type))
@@ -31,8 +31,8 @@ namespace Hessian.IO.Converters
             var valueProperty = kvType.GetProperty("Value");
             foreach (var entry in (IEnumerable)value)
             {
-                Context.IntConverter.WriteValue(writer, keyProperty.GetValue(entry));
-                Context.StringConverter.WriteValue(writer, valueProperty.GetValue(entry));
+                IntConverter.WriteValue(writer, context, keyProperty.GetValue(entry));
+                StringConverter.WriteValue(writer, context, valueProperty.GetValue(entry));
             }
 
             writer.Write(Constants.BC_END);
