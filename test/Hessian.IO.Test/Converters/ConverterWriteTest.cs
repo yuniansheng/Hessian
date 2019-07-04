@@ -197,12 +197,20 @@ namespace Hessian.IO.Test.Converters
         [Fact]
         public void WriteObject()
         {
+            var type = Serializer.Serialize(typeof(Car).FullName).ToHexString();
+            var color = Serializer.Serialize("color").ToHexString();
+            var model = Serializer.Serialize("model").ToHexString();
+            var red = Serializer.Serialize("red").ToHexString();
+            var corvette = Serializer.Serialize("corvette").ToHexString();
+            var green = Serializer.Serialize("green").ToHexString();
+            var civic = Serializer.Serialize("civic").ToHexString();
+
             Serializer.AutoReset = false;
             Serializer.Serialize(Stream, new Car("red", "corvette"));
-            ResetAndAssert("x43x14x63x6fx6dx2ex63x61x75x63x68x6fx2ex6dx6fx64x65x6cx2ex43x61x72x92x05x63x6fx6cx6fx72x05x6dx6fx64x65x6cx60x03x72x65x64x08x63x6fx72x76x65x74x74x65");
+            ResetAndAssert($"x43{type}x92{color}{model}x60{red}{corvette}");
 
             Serializer.Serialize(Stream, new Car("green", "civic"));
-            ResetAndAssert("x60x05x67x72x65x65x6ex05x63x69x76x69x63");
+            ResetAndAssert($"x60{green}{civic}");
         }
 
         [Fact]
