@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Hessian.IO.Converters
 {
-    public class EnumConverter : HessianConverter
+    public class EnumConverter : ValueRefConverterBase
     {
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
@@ -19,6 +19,11 @@ namespace Hessian.IO.Converters
             if (!t.IsEnum)
             {
                 throw Exceptions.UnExpectedTypeException(t);
+            }
+
+            if (WriteRefIfValueExisted(writer, context, value))
+            {
+                return;
             }
 
             (var index, var isNewItem) = context.ClassRefs.AddItem(t);

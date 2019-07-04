@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Hessian.IO.Converters
 {
-    public class ListConverter : HessianConverter
+    public class ListConverter : ValueRefConverterBase
     {
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
@@ -17,26 +17,33 @@ namespace Hessian.IO.Converters
         public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
+            Type itemType = null;
             if (type == typeof(ArrayList))
             {
-                writer.Write(Constants.BC_LIST_VARIABLE_UNTYPED);
+                itemType = typeof(object);
             }
             else if (IsGenericList(type))
             {
-                var itemType = type.GenericTypeArguments[0];
-                if (itemType == typeof(object))
-                {
-                    writer.Write(Constants.BC_LIST_VARIABLE_UNTYPED);
-                }
-                else
-                {
-                    writer.Write(Constants.BC_LIST_VARIABLE);
-                    TypeConverter.WriteValue(writer, context, itemType);
-                }
+                itemType = type.GenericTypeArguments[0];
             }
             else
             {
                 throw Exceptions.UnExpectedTypeException(type);
+            }
+
+            if (WriteRefIfValueExisted(writer, context, value))
+            {
+                return;
+            }
+
+            if (itemType == typeof(object))
+            {
+                writer.Write(Constants.BC_LIST_VARIABLE_UNTYPED);
+            }
+            else
+            {
+                writer.Write(Constants.BC_LIST_VARIABLE);
+                TypeConverter.WriteValue(writer, context, itemType);
             }
 
             foreach (var item in (IEnumerable)value)

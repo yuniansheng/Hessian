@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Hessian.IO.Converters
 {
-    public class MapConverter : HessianConverter
+    public class MapConverter : ValueRefConverterBase
     {
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
@@ -21,6 +21,11 @@ namespace Hessian.IO.Converters
             if (!IsMap(type))
             {
                 throw Exceptions.UnExpectedTypeException(type);
+            }
+
+            if (WriteRefIfValueExisted(writer, context, value))
+            {
+                return;
             }
 
             writer.Write(Constants.BC_MAP_UNTYPED);

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Hessian.IO.Converters
 {
-    public class ObjectConverter : HessianConverter
+    public class ObjectConverter : ValueRefConverterBase
     {
         private Dictionary<Type, List<PropertyInfo>> _propertiesCache = new Dictionary<Type, List<PropertyInfo>>();
 
@@ -17,6 +17,11 @@ namespace Hessian.IO.Converters
 
         public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
+            if (WriteRefIfValueExisted(writer, context, value))
+            {
+                return;
+            }
+
             Type t = value.GetType();
             (var index, var isNewItem) = context.ClassRefs.AddItem(t);
 

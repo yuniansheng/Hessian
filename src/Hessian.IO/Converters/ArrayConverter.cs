@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Hessian.IO.Converters
 {
-    public class ArrayConverter : HessianConverter
+    public class ArrayConverter : ValueRefConverterBase
     {
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
@@ -26,6 +26,11 @@ namespace Hessian.IO.Converters
             if (elementType == typeof(byte) || elementType == typeof(sbyte))
             {
                 BinaryConverter.WriteValue(writer, context, value);
+                return;
+            }
+
+            if (WriteRefIfValueExisted(writer, context, value))
+            {
                 return;
             }
 

@@ -9,6 +9,7 @@ namespace Hessian.IO
     {
         public ReferenceMap<Type> TypeRefs { get; set; } = new ReferenceMap<Type>();
         public ReferenceMap<Type> ClassRefs { get; set; } = new ReferenceMap<Type>();
+        public ReferenceMap<object> ValueRefs { get; set; } = new ReferenceMap<object>();
 
         public HessianContext()
         {
