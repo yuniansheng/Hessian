@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -24,6 +25,7 @@ namespace Hessian.IO.Converters
 
             writer.Write(Constants.BC_MAP_UNTYPED);
 
+
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(type.GetGenericArguments());
             var keyProperty = kvType.GetProperty("Key");
             var valueProperty = kvType.GetProperty("Value");
@@ -38,8 +40,22 @@ namespace Hessian.IO.Converters
 
         public bool IsMap(Type type)
         {
-            return type.IsGenericType &&
-                (typeof(IDictionary<,>).IsAssignableFrom(type.GetGenericTypeDefinition()) || typeof(IReadOnlyDictionary<,>).IsAssignableFrom(type.GetGenericTypeDefinition()));
+            if (type.IsGenericType && type.GenericTypeArguments.Length == 2)
+            {
+                var genericTypeDefinition = type.GetGenericTypeDefinition();
+                if (typeof(Dictionary<,>).IsAssignableFrom(genericTypeDefinition) || typeof(ReadOnlyDictionary<,>).IsAssignableFrom(genericTypeDefinition))
+                {
+                    return true;
+                }
+
+                if (typeof(IDictionary<,>).MakeGenericType(type.GenericTypeArguments).IsAssignableFrom(type) || typeof(IReadOnlyDictionary<,>).MakeGenericType(type.GenericTypeArguments).IsAssignableFrom(type))
+                {
+                    return true;
+                }
+            }
+            {
+                return false;
+            }
         }
     }
 }

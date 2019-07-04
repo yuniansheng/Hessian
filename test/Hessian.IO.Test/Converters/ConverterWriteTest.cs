@@ -168,26 +168,32 @@ namespace Hessian.IO.Test.Converters
             var untypedList = new List<object> { "ab", "ab" };
             Context.ListConverter.WriteValue(Writer, untypedList);
             Assert.Matches($"x57(x02x61x62){{2}}x5a", GetAndReset());
+        }
+
+        [Fact]
+        public void WriteArray()
+        {
+            string stringType = "x0dx53x79x73x74x65x6dx2ex53x74x72x69x6ex67";
 
             //fixed-length list
             var fixedList = new string[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
-            Context.ListConverter.WriteValue(Writer, fixedList);
+            Context.ArrayConverter.WriteValue(Writer, fixedList);
             Assert.Matches($"x56{stringType}x98(x02x61x62){{8}}", GetAndReset());
             Context.TypeRefs.Clear();
             //fixed-length short list
             var fixedShortList = new string[] { "ab", "ab" };
-            Context.ListConverter.WriteValue(Writer, fixedShortList);
+            Context.ArrayConverter.WriteValue(Writer, fixedShortList);
             Assert.Matches($"x72{stringType}(x02x61x62){{2}}", GetAndReset());
             Context.TypeRefs.Clear();
 
             //fixed-length untyped list
             var fixedUntypedList = new object[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
-            Context.ListConverter.WriteValue(Writer, fixedUntypedList);
+            Context.ArrayConverter.WriteValue(Writer, fixedUntypedList);
             Assert.Matches($"x58x98(x02x61x62){{8}}", GetAndReset());
             Context.TypeRefs.Clear();
             //fixed-length short list
             var fixedUntypedShortList = new object[] { "ab", "ab" };
-            Context.ListConverter.WriteValue(Writer, fixedUntypedShortList);
+            Context.ArrayConverter.WriteValue(Writer, fixedUntypedShortList);
             Assert.Matches($"x7a(x02x61x62){{2}}", GetAndReset());
             Context.TypeRefs.Clear();
         }
@@ -208,6 +214,16 @@ namespace Hessian.IO.Test.Converters
 
             Context.ObjectConverter.WriteValue(Writer, new Car("green", "civic"));
             ResetAndAssert("x60x05x67x72x65x65x6ex05x63x69x76x69x63");
+        }
+
+        [Fact]
+        public void WriteEnum()
+        {
+            Context.EnumConverter.WriteValue(Writer, DayOfWeek.Monday);
+            ResetAndAssert("x43x10x53x79x73x74x65x6dx2ex44x61x79x4fx66x57x65x65x6bx91x04x6ex61x6dx65x60x06x4dx6fx6ex64x61x79");
+
+            Context.EnumConverter.WriteValue(Writer, DayOfWeek.Friday);
+            ResetAndAssert("x60x06x46x72x69x64x61x79");
         }
 
         [Fact]

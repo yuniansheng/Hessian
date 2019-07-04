@@ -38,43 +38,7 @@ namespace Hessian.IO.Converters
                 writer.Write(index);
             }
 
-            if (Enum.IsDefined(t, value))
-            {
-                Context.StringConverter.WriteValue(writer, value.ToString());
-            }
-            else
-            {
-                var underlyingTypeCode = Type.GetTypeCode(t);
-                switch (underlyingTypeCode)
-                {
-                    case TypeCode.Byte:
-                        Context.IntConverter.WriteInt(writer, (byte)value);
-                        break;
-                    case TypeCode.SByte:
-                        Context.IntConverter.WriteInt(writer, (sbyte)value);
-                        break;
-                    case TypeCode.Int16:
-                        Context.IntConverter.WriteInt(writer, (short)value);
-                        break;
-                    case TypeCode.UInt16:
-                        Context.IntConverter.WriteInt(writer, (ushort)value);
-                        break;
-                    case TypeCode.Int32:
-                        Context.IntConverter.WriteInt(writer, (int)value);
-                        break;
-                    case TypeCode.UInt32:
-                        Context.IntConverter.WriteUInt(writer, (uint)value);
-                        break;
-                    case TypeCode.Int64:
-                        Context.LongConverter.WriteLong(writer, (long)value);
-                        break;
-                    case TypeCode.UInt64:
-                        Context.LongConverter.WriteULong(writer, (ulong)value);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            Context.StringConverter.WriteValue(writer, value.ToString());
         }
 
         private void WriteClassDefinition(HessianWriter writer, Type type)
