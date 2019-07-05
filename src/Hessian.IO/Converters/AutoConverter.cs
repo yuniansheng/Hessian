@@ -26,7 +26,7 @@ namespace Hessian.IO.Converters
             converter.WriteValue(writer, context, value);
         }
 
-        private HessianConverter GetConverter(Type type)
+        public HessianConverter GetConverter(Type type)
         {
             if (type.IsPrimitive)
             {

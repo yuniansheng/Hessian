@@ -17,14 +17,16 @@ namespace Hessian.IO.Converters
         public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
-            Type itemType = null;
+            Type elementType = null;
+            HessianConverter itemConverter = null;
             if (type == typeof(ArrayList))
             {
-                itemType = typeof(object);
+                elementType = typeof(object);
+
             }
             else if (IsGenericList(type))
             {
-                itemType = type.GenericTypeArguments[0];
+                elementType = type.GenericTypeArguments[0];
             }
             else
             {
@@ -36,19 +38,21 @@ namespace Hessian.IO.Converters
                 return;
             }
 
-            if (itemType == typeof(object))
+            if (elementType == typeof(object))
             {
+                itemConverter = AutoConverter;
                 writer.Write(Constants.BC_LIST_VARIABLE_UNTYPED);
             }
             else
             {
+                itemConverter = AutoConverter.GetConverter(elementType);
                 writer.Write(Constants.BC_LIST_VARIABLE);
-                TypeConverter.WriteValue(writer, context, itemType);
+                TypeConverter.WriteValue(writer, context, elementType);
             }
 
             foreach (var item in (IEnumerable)value)
             {
-                StringConverter.WriteValue(writer, context, item);
+                itemConverter.WriteValue(writer, context, item);
             }
             writer.Write(Constants.BC_END);
         }
@@ -60,7 +64,22 @@ namespace Hessian.IO.Converters
 
         private bool IsGenericList(Type type)
         {
-            return type.IsGenericType && typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition());
+            if (type.IsGenericType && type.GenericTypeArguments.Length == 1)
+            {
+                var genericTypeDefinition = type.GetGenericTypeDefinition();
+                if (typeof(List<>).IsAssignableFrom(genericTypeDefinition))
+                {
+                    return true;
+                }
+
+                if (typeof(IList<>).MakeGenericType(type.GenericTypeArguments).IsAssignableFrom(type))
+                {
+                    return true;
+                }
+            }
+            {
+                return false;
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ namespace Hessian.IO.Converters
             }
 
             var array = (Array)value;
+            HessianConverter itemConverter = null;
             if (elementType == typeof(object))
             {
                 //untyped array
@@ -47,6 +48,7 @@ namespace Hessian.IO.Converters
                     writer.Write(Constants.BC_LIST_FIXED_UNTYPED);
                     IntConverter.WriteValue(writer, context, array.Length);
                 }
+                itemConverter = AutoConverter;
             }
             else
             {
@@ -61,11 +63,12 @@ namespace Hessian.IO.Converters
                     TypeConverter.WriteValue(writer, context, elementType);
                     IntConverter.WriteValue(writer, context, array.Length);
                 }
+                itemConverter = AutoConverter.GetConverter(elementType);
             }
 
             foreach (var item in array)
             {
-                StringConverter.WriteValue(writer, context, item);
+                itemConverter.WriteValue(writer, context, item);
             }
         }
     }

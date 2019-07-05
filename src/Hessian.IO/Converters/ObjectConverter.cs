@@ -44,7 +44,7 @@ namespace Hessian.IO.Converters
             foreach (var property in properties)
             {
                 object propertyValue = property.GetValue(value);
-                StringConverter.WriteValue(writer, context, propertyValue);
+                AutoConverter.WriteValue(writer, context, propertyValue);
             }
         }
 

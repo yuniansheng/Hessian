@@ -31,5 +31,14 @@ namespace Hessian.IO.Test.Converters
             Stream.SetLength(0);
             return content;
         }
+
+        public string H(object value)
+        {
+            if (value is char)
+            {
+                return string.Format("x{0:x2}", (byte)(char)value);
+            }
+            return new HessianSerializer().Serialize(value).ToHexString();
+        }
     }
 }

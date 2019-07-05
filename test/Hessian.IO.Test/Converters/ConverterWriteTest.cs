@@ -1,5 +1,6 @@
 ﻿using com.caucho.model;
 using Hessian.IO.Converters;
+using Hessian.IO.Test.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -146,17 +147,18 @@ namespace Hessian.IO.Test.Converters
         [Fact]
         public void WriteList()
         {
-            string stringType = "x0dx53x79x73x74x65x6dx2ex53x74x72x69x6ex67";
+            var stringType = Serializer.Serialize(typeof(string)).ToHexString();
+            var ab = Serializer.Serialize("ab").ToHexString();
 
             //variable-length list
             var list = new List<string> { "ab", "ab" };
             Serializer.Serialize(Stream, list);
-            Assert.Matches($"55{stringType}(x02x61x62){{2}}x5a", GetAndReset());
+            Assert.Matches($"55{stringType}({ab}){{2}}x5a", GetAndReset());
 
             //variable-length untyped list
             var untypedList = new List<object> { "ab", "ab" };
             Serializer.Serialize(Stream, untypedList);
-            Assert.Matches($"x57(x02x61x62){{2}}x5a", GetAndReset());
+            Assert.Matches($"x57({ab}){{2}}x5a", GetAndReset());
         }
 
         [Fact]
@@ -191,26 +193,14 @@ namespace Hessian.IO.Test.Converters
         {
             var dict = new Dictionary<int, string> { { 1, "fee" }, { 16, "fie" }, { 256, "foe" } };
             Serializer.Serialize(Stream, dict);
-            ResetAndAssert("x48x91x03x66x65x65xa0x03x66x69x65xc9x00x03x66x6fx65x5a");
+            ResetAndAssert($"{H('H')}{H(1)}{H("fee")}{H(16)}{H("fie")}{H(256)}{H("foe")}{H('Z')}");
         }
 
         [Fact]
         public void WriteObject()
         {
-            var type = Serializer.Serialize(typeof(Car).FullName).ToHexString();
-            var color = Serializer.Serialize("color").ToHexString();
-            var model = Serializer.Serialize("model").ToHexString();
-            var red = Serializer.Serialize("red").ToHexString();
-            var corvette = Serializer.Serialize("corvette").ToHexString();
-            var green = Serializer.Serialize("green").ToHexString();
-            var civic = Serializer.Serialize("civic").ToHexString();
-
-            Serializer.AutoReset = false;
             Serializer.Serialize(Stream, new Car("red", "corvette"));
-            ResetAndAssert($"x43{type}x92{color}{model}x60{red}{corvette}");
-
-            Serializer.Serialize(Stream, new Car("green", "civic"));
-            ResetAndAssert($"x60{green}{civic}");
+            ResetAndAssert($"{H('C')}{H(typeof(Car).FullName)}{H(2)}{H("color")}{H("model")}x60{H("red")}{H("corvette")}");
         }
 
         [Fact]
@@ -261,6 +251,68 @@ namespace Hessian.IO.Test.Converters
 
             Serializer.Serialize(Stream, typeof(string));
             ResetAndAssert("x91");
+        }
+
+        [Fact]
+        public void TypeRef()
+        {
+            Serializer.AutoReset = false;
+            Serializer.Serialize(Stream, typeof(string));
+            ResetAndAssert($"{H(typeof(string).FullName)}");
+
+            Serializer.Serialize(Stream, typeof(string));
+            ResetAndAssert($"{H(0)}");
+        }
+
+        [Fact]
+        public void ClassRef()
+        {
+            Serializer.AutoReset = false;
+            Serializer.Serialize(Stream, new Car("red", "corvette"));
+            ResetAndAssert($"{H('C')}{H(typeof(Car).FullName)}{H(2)}{H("color")}{H("model")}x60{H("red")}{H("corvette")}");
+
+            Serializer.Serialize(Stream, new Person { Name = "yns", Age = 22 });
+            ResetAndAssert($"{H('C')}{H(typeof(Person).FullName)}{H(2)}{H("Name")}{H("Age")}x61{H("yns")}{H(22)}");
+        }
+
+        [Fact]
+        public void ValueRef()
+        {
+            Serializer.AutoReset = false;
+
+            //object
+            var car = new Car("red", "corvette");
+            Serializer.Serialize(Stream, car);
+            GetAndReset();
+            Serializer.Serialize(Stream, car);
+            ResetAndAssert($"x51{H(0)}");
+
+            //enum
+            Serializer.Serialize(Stream, DayOfWeek.Monday);
+            GetAndReset();
+            Serializer.Serialize(Stream, DayOfWeek.Monday);
+            ResetAndAssert($"x51{H(1)}");
+
+            //map
+            var dict = new Dictionary<int, string> { { 1, "fee" } };
+            Serializer.Serialize(Stream, dict);
+            GetAndReset();
+            Serializer.Serialize(Stream, dict);
+            ResetAndAssert($"x51{H(2)}");
+
+            //array
+            var array = new string[] { "ab", "ab" };
+            Serializer.Serialize(Stream, array);
+            GetAndReset();
+            Serializer.Serialize(Stream, array);
+            ResetAndAssert($"x51{H(3)}");
+
+            //list
+            var list = new List<string> { "ab", "ab" };
+            Serializer.Serialize(Stream, list);
+            GetAndReset();
+            Serializer.Serialize(Stream, list);
+            ResetAndAssert($"x51{H(4)}");
         }
     }
 }

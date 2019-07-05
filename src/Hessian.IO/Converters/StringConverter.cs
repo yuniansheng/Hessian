@@ -15,12 +15,20 @@ namespace Hessian.IO.Converters
         public override void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             var type = value.GetType();
-            if (type != typeof(string))
+            string s = null;
+            if (type == typeof(string))
+            {
+                s = (string)value;
+            }
+            else if (type == typeof(char))
+            {
+                s = value.ToString();
+            }
+            else
             {
                 throw Exceptions.UnExpectedTypeException(type);
             }
 
-            string s = (string)value;
             int length = s.Length;
             int index = 0;
 

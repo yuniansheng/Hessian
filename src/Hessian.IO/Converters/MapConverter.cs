@@ -36,8 +36,8 @@ namespace Hessian.IO.Converters
             var valueProperty = kvType.GetProperty("Value");
             foreach (var entry in (IEnumerable)value)
             {
-                IntConverter.WriteValue(writer, context, keyProperty.GetValue(entry));
-                StringConverter.WriteValue(writer, context, valueProperty.GetValue(entry));
+                AutoConverter.WriteValue(writer, context, keyProperty.GetValue(entry));
+                AutoConverter.WriteValue(writer, context, valueProperty.GetValue(entry));
             }
 
             writer.Write(Constants.BC_END);
