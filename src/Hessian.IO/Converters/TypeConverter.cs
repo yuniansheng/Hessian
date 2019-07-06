@@ -12,7 +12,7 @@ namespace Hessian.IO.Converters
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)
         {
             if (!(value is Type))
             {
@@ -25,11 +25,11 @@ namespace Hessian.IO.Converters
 
             if (isNewItem)
             {
-                StringConverter.WriteValue(writer, context, type.FullName);
+                StringConverter.WriteValueNotNull(writer, context, type.ToString());
             }
             else
             {
-                IntConverter.WriteValue(writer, context, index);
+                IntConverter.WriteValueNotNull(writer, context, index);
             }
         }
     }

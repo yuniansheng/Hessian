@@ -15,7 +15,7 @@ namespace Hessian.IO.Converters
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotExisted(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
             if (!IsMap(type))
@@ -23,21 +23,18 @@ namespace Hessian.IO.Converters
                 throw Exceptions.UnExpectedTypeException(type);
             }
 
-            if (WriteRefIfValueExisted(writer, context, value))
-            {
-                return;
-            }
-
             writer.Write(Constants.BC_MAP_UNTYPED);
 
 
-            var kvType = typeof(KeyValuePair<,>).MakeGenericType(type.GetGenericArguments());
+            var kvType = typeof(KeyValuePair<,>).MakeGenericType(type.GenericTypeArguments);
             var keyProperty = kvType.GetProperty("Key");
             var valueProperty = kvType.GetProperty("Value");
+            var keyConverter = AutoConverter.GetConverter(type.GenericTypeArguments[0]);
+            var valueConverter = AutoConverter.GetConverter(type.GenericTypeArguments[1]);
             foreach (var entry in (IEnumerable)value)
             {
-                AutoConverter.WriteValue(writer, context, keyProperty.GetValue(entry));
-                AutoConverter.WriteValue(writer, context, valueProperty.GetValue(entry));
+                keyConverter.WriteValue(writer, context, keyProperty.GetValue(entry));
+                valueConverter.WriteValue(writer, context, valueProperty.GetValue(entry));
             }
 
             writer.Write(Constants.BC_END);

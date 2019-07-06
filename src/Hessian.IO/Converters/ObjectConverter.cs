@@ -8,27 +8,35 @@ namespace Hessian.IO.Converters
 {
     public class ObjectConverter : ValueRefConverterBase
     {
-        private Dictionary<Type, List<PropertyInfo>> _propertiesCache = new Dictionary<Type, List<PropertyInfo>>();
+        private Dictionary<Type, ClassDefinition> _classDefinitionCache = new Dictionary<Type, ClassDefinition>();
 
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotExisted(HessianWriter writer, HessianContext context, object value)
         {
-            if (WriteRefIfValueExisted(writer, context, value))
-            {
-                return;
-            }
+            var definition = LoadClassDefinition(value.GetType());
+            WriteClassDefinitionAndObjectBegin(writer, context, definition);
+            WriteObjectBody(writer, context, value, definition);
+        }
 
-            Type t = value.GetType();
-            (var index, var isNewItem) = context.ClassRefs.AddItem(t);
-
-            var properties = LoadProperties(t);
+        private ClassDefinition WriteClassDefinitionAndObjectBegin(HessianWriter writer, HessianContext context, ClassDefinition definition)
+        {
+            var type = definition.Type;
+            (var index, var isNewItem) = context.ClassRefs.AddItem(type);
             if (isNewItem)
             {
-                WriteClassDefinition(writer, context, t, properties);
+                writer.Write(Constants.BC_OBJECT_DEF);
+                StringConverter.WriteValueNotNull(writer, context, type.ToString());
+
+                IntConverter.WriteInt(writer, context, definition.FieldAccessors.Count);
+
+                foreach (var property in definition.FieldAccessors)
+                {
+                    StringConverter.WriteValueNotNull(writer, context, property.Key);
+                }
             }
 
             if (index <= Constants.OBJECT_DIRECT_MAX)
@@ -40,42 +48,33 @@ namespace Hessian.IO.Converters
                 writer.Write(Constants.BC_OBJECT);
                 writer.Write(index);
             }
+            return definition;
+        }
 
-            foreach (var property in properties)
+        protected virtual void WriteObjectBody(HessianWriter writer, HessianContext context, object value, ClassDefinition definition)
+        {
+            foreach (var fieldAccessor in definition.FieldAccessors.Values)
             {
-                object propertyValue = property.GetValue(value);
-                AutoConverter.WriteValue(writer, context, propertyValue);
+                object fieldValue = fieldAccessor(value);
+                AutoConverter.WriteValue(writer, context, fieldValue);
             }
         }
 
-        private void WriteClassDefinition(HessianWriter writer, HessianContext context, Type type, List<PropertyInfo> properties)
+        protected virtual ClassDefinition LoadClassDefinition(Type type)
         {
-            writer.Write(Constants.BC_OBJECT_DEF);
-            StringConverter.WriteValue(writer, context, type.FullName);
-
-            IntConverter.WriteValue(writer, context, properties.Count);
-
-            foreach (var property in properties)
+            ClassDefinition definition = null;
+            if (!_classDefinitionCache.TryGetValue(type, out definition))
             {
-                StringConverter.WriteValue(writer, context, property.Name);
-            }
-        }
-
-        private List<PropertyInfo> LoadProperties(Type type)
-        {
-            List<PropertyInfo> list;
-            if (!_propertiesCache.TryGetValue(type, out list))
-            {
-                list = new List<PropertyInfo>();
+                definition = new ClassDefinition(type);
                 for (Type t = type; t != null; t = t.BaseType)
                 {
                     PropertyInfo[] properties = t.GetProperties(BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.GetProperty);
-                    list.AddRange(properties);
+                    definition.AddProperties(properties);
                 }
-                _propertiesCache.Add(type, list);
+                _classDefinitionCache.Add(type, definition);
             }
 
-            return list;
+            return definition;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Hessian.IO.Converters
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)
         {
             byte[] bytes = (byte[])value;
             int length = bytes.Length;

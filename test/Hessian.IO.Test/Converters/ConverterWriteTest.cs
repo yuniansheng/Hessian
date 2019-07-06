@@ -200,7 +200,7 @@ namespace Hessian.IO.Test.Converters
         public void WriteObject()
         {
             Serializer.Serialize(Stream, new Car("red", "corvette"));
-            ResetAndAssert($"{H('C')}{H(typeof(Car).FullName)}{H(2)}{H("color")}{H("model")}x60{H("red")}{H("corvette")}");
+            ResetAndAssert($"{H('C')}{H(typeof(Car).ToString())}{H(2)}{H("color")}{H("model")}x60{H("red")}{H("corvette")}");
         }
 
         [Fact]
@@ -258,7 +258,7 @@ namespace Hessian.IO.Test.Converters
         {
             Serializer.AutoReset = false;
             Serializer.Serialize(Stream, typeof(string));
-            ResetAndAssert($"{H(typeof(string).FullName)}");
+            ResetAndAssert($"{H(typeof(string).ToString())}");
 
             Serializer.Serialize(Stream, typeof(string));
             ResetAndAssert($"{H(0)}");
@@ -269,10 +269,10 @@ namespace Hessian.IO.Test.Converters
         {
             Serializer.AutoReset = false;
             Serializer.Serialize(Stream, new Car("red", "corvette"));
-            ResetAndAssert($"{H('C')}{H(typeof(Car).FullName)}{H(2)}{H("color")}{H("model")}x60{H("red")}{H("corvette")}");
+            ResetAndAssert($"{H('C')}{H(typeof(Car).ToString())}{H(2)}{H("color")}{H("model")}x60{H("red")}{H("corvette")}");
 
             Serializer.Serialize(Stream, new Person { Name = "yns", Age = 22 });
-            ResetAndAssert($"{H('C')}{H(typeof(Person).FullName)}{H(2)}{H("Name")}{H("Age")}x61{H("yns")}{H(22)}");
+            ResetAndAssert($"{H('C')}{H(typeof(Person).ToString())}{H(2)}{H("Name")}{H("Age")}x61{H("yns")}{H(22)}");
         }
 
         [Fact]

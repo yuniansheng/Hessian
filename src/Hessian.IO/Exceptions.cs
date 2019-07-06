@@ -9,7 +9,7 @@ namespace Hessian.IO
     {
         internal static InvalidOperationException UnExpectedTypeException(Type type)
         {
-            return new InvalidOperationException(string.Format(Resources.UnExpectedType, type.FullName));
+            return new InvalidOperationException(string.Format(Resources.UnExpectedType, type.ToString()));
         }
     }
 }

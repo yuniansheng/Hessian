@@ -12,36 +12,36 @@ namespace Hessian.IO.Converters
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)
         {
             var type = value.GetType();
             var typeCode = Type.GetTypeCode(type);
             switch (typeCode)
             {
                 case TypeCode.Byte:
-                    WriteInt(writer, (byte)value);
+                    WriteInt(writer, context, (byte)value);
                     break;
                 case TypeCode.SByte:
-                    WriteInt(writer, (sbyte)value);
+                    WriteInt(writer, context, (sbyte)value);
                     break;
                 case TypeCode.Int16:
-                    WriteInt(writer, (short)value);
+                    WriteInt(writer, context, (short)value);
                     break;
                 case TypeCode.UInt16:
-                    WriteInt(writer, (ushort)value);
+                    WriteInt(writer, context, (ushort)value);
                     break;
                 case TypeCode.Int32:
-                    WriteInt(writer, (int)value);
+                    WriteInt(writer, context, (int)value);
                     break;
                 case TypeCode.UInt32:
-                    WriteUInt(writer, (uint)value);
+                    WriteUInt(writer, context, (uint)value);
                     break;
                 default:
                     throw Exceptions.UnExpectedTypeException(type);
             }
         }
 
-        public void WriteInt(HessianWriter writer, int value)
+        public void WriteInt(HessianWriter writer, HessianContext context, int value)
         {
             if (Constants.INT_DIRECT_MIN <= value && value <= Constants.INT_DIRECT_MAX)
                 writer.Write((byte)(Constants.BC_INT_ZERO + value));
@@ -62,9 +62,9 @@ namespace Hessian.IO.Converters
             }
         }
 
-        public void WriteUInt(HessianWriter writer, uint value)
+        public void WriteUInt(HessianWriter writer, HessianContext context, uint value)
         {
-            WriteInt(writer, unchecked((int)value));
+            WriteInt(writer, context, unchecked((int)value));
         }
     }
 }

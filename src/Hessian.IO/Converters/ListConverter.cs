@@ -14,40 +14,34 @@ namespace Hessian.IO.Converters
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotExisted(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
-            Type elementType = null;
-            HessianConverter itemConverter = null;
+            Type itemType = null;
             if (type == typeof(ArrayList))
             {
-                elementType = typeof(object);
-
+                itemType = typeof(object);
             }
             else if (IsGenericList(type))
             {
-                elementType = type.GenericTypeArguments[0];
+                itemType = type.GenericTypeArguments[0];
             }
             else
             {
                 throw Exceptions.UnExpectedTypeException(type);
             }
 
-            if (WriteRefIfValueExisted(writer, context, value))
+            HessianConverter itemConverter = null;
+            if (itemType == typeof(object))
             {
-                return;
-            }
-
-            if (elementType == typeof(object))
-            {
-                itemConverter = AutoConverter;
                 writer.Write(Constants.BC_LIST_VARIABLE_UNTYPED);
+                itemConverter = AutoConverter;
             }
             else
             {
-                itemConverter = AutoConverter.GetConverter(elementType);
                 writer.Write(Constants.BC_LIST_VARIABLE);
-                TypeConverter.WriteValue(writer, context, elementType);
+                TypeConverter.WriteValueNotNull(writer, context, itemType);
+                itemConverter = AutoConverter.GetConverter(itemType);
             }
 
             foreach (var item in (IEnumerable)value)
@@ -64,22 +58,7 @@ namespace Hessian.IO.Converters
 
         private bool IsGenericList(Type type)
         {
-            if (type.IsGenericType && type.GenericTypeArguments.Length == 1)
-            {
-                var genericTypeDefinition = type.GetGenericTypeDefinition();
-                if (typeof(List<>).IsAssignableFrom(genericTypeDefinition))
-                {
-                    return true;
-                }
-
-                if (typeof(IList<>).MakeGenericType(type.GenericTypeArguments).IsAssignableFrom(type))
-                {
-                    return true;
-                }
-            }
-            {
-                return false;
-            }
+            return type.IsGenericType && typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition());
         }
     }
 }

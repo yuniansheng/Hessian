@@ -9,20 +9,20 @@ namespace Hessian.IO.Converters
 {
     public abstract class ValueRefConverterBase : HessianConverter
     {
-        /// <summary>
-        /// if value existed in the ref then write the ref index
-        /// </summary>
-        /// <returns>true if value is existed in the ref, or return false</returns>
-        public bool WriteRefIfValueExisted(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)
         {
             (var index, var isNew) = context.ValueRefs.AddItem(value);
-            if (!isNew)
+            if (isNew)
+            {
+                WriteValueNotExisted(writer, context, value);
+            }
+            else
             {
                 writer.Write(Constants.BC_REF);
-                IntConverter.WriteInt(writer, index);
+                IntConverter.WriteInt(writer, context, index);
             }
-
-            return !isNew;
         }
+
+        public abstract void WriteValueNotExisted(HessianWriter writer, HessianContext context, object value);
     }
 }

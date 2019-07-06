@@ -14,7 +14,7 @@ namespace Hessian.IO.Converters
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotExisted(HessianWriter writer, HessianContext context, object value)
         {
             Type type = value.GetType();
             if (!type.IsArray)
@@ -25,12 +25,7 @@ namespace Hessian.IO.Converters
             var elementType = type.GetElementType();
             if (elementType == typeof(byte) || elementType == typeof(sbyte))
             {
-                BinaryConverter.WriteValue(writer, context, value);
-                return;
-            }
-
-            if (WriteRefIfValueExisted(writer, context, value))
-            {
+                BinaryConverter.WriteValueNotNull(writer, context, value);
                 return;
             }
 
@@ -46,7 +41,7 @@ namespace Hessian.IO.Converters
                 else
                 {
                     writer.Write(Constants.BC_LIST_FIXED_UNTYPED);
-                    IntConverter.WriteValue(writer, context, array.Length);
+                    IntConverter.WriteInt(writer, context, array.Length);
                 }
                 itemConverter = AutoConverter;
             }
@@ -55,13 +50,13 @@ namespace Hessian.IO.Converters
                 if (array.Length <= Constants.LIST_DIRECT_MAX)
                 {
                     writer.Write((byte)(Constants.BC_LIST_DIRECT + array.Length));
-                    TypeConverter.WriteValue(writer, context, elementType);
+                    TypeConverter.WriteValueNotNull(writer, context, elementType);
                 }
                 else
                 {
                     writer.Write(Constants.BC_LIST_FIXED);
-                    TypeConverter.WriteValue(writer, context, elementType);
-                    IntConverter.WriteValue(writer, context, array.Length);
+                    TypeConverter.WriteValueNotNull(writer, context, elementType);
+                    IntConverter.WriteInt(writer, context, array.Length);
                 }
                 itemConverter = AutoConverter.GetConverter(elementType);
             }

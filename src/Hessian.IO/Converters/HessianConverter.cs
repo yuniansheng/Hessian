@@ -40,6 +40,17 @@ namespace Hessian.IO.Converters
 
         public abstract object ReadValue(HessianReader reader, HessianContext context, Type objectType);
 
-        public abstract void WriteValue(HessianWriter writer, HessianContext context, object value);
+        public void WriteValue(HessianWriter writer, HessianContext context, object value)
+        {
+            if (value == null)
+            {
+                writer.Write(Constants.BC_NULL);
+                return;
+            }
+
+            WriteValueNotNull(writer, context, value);
+        }
+
+        public abstract void WriteValueNotNull(HessianWriter writer, HessianContext context, object value);
     }
 }

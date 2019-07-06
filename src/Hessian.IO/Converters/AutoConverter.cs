@@ -13,17 +13,11 @@ namespace Hessian.IO.Converters
             throw new NotImplementedException();
         }
 
-        public override void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)
         {
-            if (value == null)
-            {
-                writer.Write(Constants.BC_NULL);
-                return;
-            }
-
             var type = value.GetType();
             var converter = GetConverter(type);
-            converter.WriteValue(writer, context, value);
+            converter.WriteValueNotNull(writer, context, value);
         }
 
         public HessianConverter GetConverter(Type type)
