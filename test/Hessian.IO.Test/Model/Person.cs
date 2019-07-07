@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Hessian.IO.Test.Model
+namespace com.caucho.model
 {
     public class Person
     {

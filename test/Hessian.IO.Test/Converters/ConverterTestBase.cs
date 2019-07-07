@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Hessian.IO.Test.Converters
 {
@@ -12,11 +13,14 @@ namespace Hessian.IO.Test.Converters
 
         public HessianSerializer Serializer { get; set; }
 
-        public ConverterTestBase()
+        private readonly ITestOutputHelper output;
+
+        public ConverterTestBase(ITestOutputHelper output)
         {
             Stream = new MemoryStream();
             Serializer = new HessianSerializer();
             Serializer.AutoReset = true;
+            this.output = output;
         }
 
         public void ResetAndAssert(string expected)
@@ -29,6 +33,7 @@ namespace Hessian.IO.Test.Converters
             Stream.Seek(0, SeekOrigin.Begin);
             var content = Stream.ToHexString();
             Stream.SetLength(0);
+            output.WriteLine(content);
             return content;
         }
 

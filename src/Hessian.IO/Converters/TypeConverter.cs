@@ -19,18 +19,59 @@ namespace Hessian.IO.Converters
                 throw Exceptions.UnExpectedTypeException(value.GetType());
             }
 
-            Type type = (Type)value;
+            var type = (Type)value;
 
             (int index, bool isNewItem) = context.TypeRefs.AddItem(type);
 
             if (isNewItem)
             {
-                StringConverter.WriteValueNotNull(writer, context, type.ToString());
+                StringConverter.WriteValueNotNull(writer, context, GetTypeName(type));
             }
             else
             {
                 IntConverter.WriteValueNotNull(writer, context, index);
             }
+        }
+
+        public string GetTypeName(Type type)
+        {
+            if (type.IsArray)
+            {
+                var elementType = type.GetElementType();
+                if (elementType.IsPrimitive)
+                {
+                    var typeCode = Type.GetTypeCode(elementType);
+                    switch (typeCode)
+                    {
+                        case TypeCode.Boolean:
+                            return "[boolean";
+                        case TypeCode.Int16:
+                        case TypeCode.UInt16:
+                            return "[short";
+                        case TypeCode.Int32:
+                        case TypeCode.UInt32:
+                            return "[int";
+                        case TypeCode.Double:
+                            return "[double";
+                        case TypeCode.Single:
+                            return "[float";
+                        case TypeCode.Int64:
+                        case TypeCode.UInt64:
+                            return "[long";
+                        default:
+                            return "[" + elementType.ToString();
+                    }
+                }
+                else if (elementType == typeof(string))
+                {
+                    return "[string";
+                }
+                else
+                {
+                    return "[" + elementType.ToString();
+                }
+            }
+            return type.ToString();
         }
     }
 }

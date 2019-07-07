@@ -40,7 +40,7 @@ namespace Hessian.IO.Converters
             else
             {
                 writer.Write(Constants.BC_LIST_VARIABLE);
-                TypeConverter.WriteValueNotNull(writer, context, itemType);
+                TypeConverter.WriteValueNotNull(writer, context, type);
                 itemConverter = AutoConverter.GetConverter(itemType);
             }
 

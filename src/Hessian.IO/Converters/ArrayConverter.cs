@@ -50,12 +50,12 @@ namespace Hessian.IO.Converters
                 if (array.Length <= Constants.LIST_DIRECT_MAX)
                 {
                     writer.Write((byte)(Constants.BC_LIST_DIRECT + array.Length));
-                    TypeConverter.WriteValueNotNull(writer, context, elementType);
+                    TypeConverter.WriteValueNotNull(writer, context, type);
                 }
                 else
                 {
                     writer.Write(Constants.BC_LIST_FIXED);
-                    TypeConverter.WriteValueNotNull(writer, context, elementType);
+                    TypeConverter.WriteValueNotNull(writer, context, type);
                     IntConverter.WriteInt(writer, context, array.Length);
                 }
                 itemConverter = AutoConverter.GetConverter(elementType);

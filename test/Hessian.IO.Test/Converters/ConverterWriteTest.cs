@@ -1,16 +1,22 @@
 ﻿using com.caucho.model;
 using Hessian.IO.Converters;
-using Hessian.IO.Test.Model;
+using java.lang;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Hessian.IO.Test.Converters
 {
     public class ConverterWriteTest : ConverterTestBase
     {
+        public ConverterWriteTest(ITestOutputHelper output) : base(output)
+        {
+
+        }
+
         [Fact]
         public void WriteBinary()
         {
@@ -147,24 +153,27 @@ namespace Hessian.IO.Test.Converters
         [Fact]
         public void WriteList()
         {
-            var stringType = Serializer.Serialize(typeof(string)).ToHexString();
-            var ab = Serializer.Serialize("ab").ToHexString();
+            var ab = H("ab");
 
             //variable-length list
             var list = new List<string> { "ab", "ab" };
             Serializer.Serialize(Stream, list);
-            Assert.Matches($"55{stringType}({ab}){{2}}x5a", GetAndReset());
+            Assert.Matches($"55{H(list.GetType())}({ab}){{2}}x5a", GetAndReset());
 
             //variable-length untyped list
             var untypedList = new List<object> { "ab", "ab" };
             Serializer.Serialize(Stream, untypedList);
             Assert.Matches($"x57({ab}){{2}}x5a", GetAndReset());
+
+            var cars = new List<Car> { new Car("red", "corvette"), new Car("blue", "suv") };
+            Serializer.Serialize(Stream, cars);
+            GetAndReset();
         }
 
         [Fact]
         public void WriteArray()
         {
-            var stringType = Serializer.Serialize(typeof(string)).ToHexString();
+            var stringType = H("[string");
             var ab = Serializer.Serialize("ab").ToHexString();
 
             //fixed-length list
@@ -313,6 +322,22 @@ namespace Hessian.IO.Test.Converters
             GetAndReset();
             Serializer.Serialize(Stream, list);
             ResetAndAssert($"x51{H(4)}");
+        }
+
+        [Fact]
+        public void WriteXxlJob()
+        {
+            XxlJob job = new XxlJob();
+            job.requestParameterTypes = new Class[2];
+            job.requestParameterTypes[0] = Class.OfName("int");
+            job.requestParameterTypes[1] = Class.OfType<Car>();
+            job.requestParameters = new object[2];
+            job.requestParameters[0] = 1;
+            job.requestParameters[1] = new Car("red", "corvette");
+            job.responseMessage = "ok";
+            job.responseResult = new GenericType(200, "hello");
+            Serializer.Serialize(Stream, job);
+            GetAndReset();
         }
     }
 }
