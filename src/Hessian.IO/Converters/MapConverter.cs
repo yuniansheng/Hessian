@@ -40,7 +40,7 @@ namespace Hessian.IO.Converters
             writer.Write(Constants.BC_END);
         }
 
-        public bool IsMap(Type type)
+        public static bool IsMap(Type type)
         {
             if (type.IsGenericType && type.GenericTypeArguments.Length == 2)
             {

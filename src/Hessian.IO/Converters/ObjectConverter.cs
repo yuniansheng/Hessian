@@ -29,7 +29,7 @@ namespace Hessian.IO.Converters
             if (isNewItem)
             {
                 writer.Write(Constants.BC_OBJECT_DEF);
-                TypeConverter.WriteValueNotNull(writer, context, type);
+                TypeConverter.WriteType(writer, context, type);
 
                 IntConverter.WriteInt(writer, context, definition.FieldAccessors.Count);
 

@@ -19,7 +19,15 @@ namespace Hessian.IO.Converters
                 throw Exceptions.UnExpectedTypeException(value.GetType());
             }
 
-            var type = (Type)value;
+            WriteType(writer, context, (Type)value);
+        }
+
+        public void WriteType(HessianWriter writer, HessianContext context, Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
             (int index, bool isNewItem) = context.TypeRefs.AddItem(type);
 
@@ -29,7 +37,7 @@ namespace Hessian.IO.Converters
             }
             else
             {
-                IntConverter.WriteValueNotNull(writer, context, index);
+                IntConverter.WriteInt(writer, context, index);
             }
         }
 

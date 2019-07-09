@@ -40,7 +40,7 @@ namespace Hessian.IO.Converters
             else
             {
                 writer.Write(Constants.BC_LIST_VARIABLE);
-                TypeConverter.WriteValueNotNull(writer, context, type);
+                TypeConverter.WriteType(writer, context, type);
                 itemConverter = AutoConverter.GetConverter(itemType);
             }
 
@@ -51,12 +51,12 @@ namespace Hessian.IO.Converters
             writer.Write(Constants.BC_END);
         }
 
-        public bool IsList(Type type)
+        public static bool IsList(Type type)
         {
             return type == typeof(ArrayList) || IsGenericList(type);
         }
 
-        private bool IsGenericList(Type type)
+        private static bool IsGenericList(Type type)
         {
             return type.IsGenericType && typeof(List<>).IsAssignableFrom(type.GetGenericTypeDefinition());
         }

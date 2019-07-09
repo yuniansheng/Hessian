@@ -25,7 +25,7 @@ namespace Hessian.IO.Converters
             var elementType = type.GetElementType();
             if (elementType == typeof(byte) || elementType == typeof(sbyte))
             {
-                BinaryConverter.WriteValueNotNull(writer, context, value);
+                GetConverter<BinaryConverter>().WriteValueNotNull(writer, context, value);
                 return;
             }
 
@@ -50,12 +50,12 @@ namespace Hessian.IO.Converters
                 if (array.Length <= Constants.LIST_DIRECT_MAX)
                 {
                     writer.Write((byte)(Constants.BC_LIST_DIRECT + array.Length));
-                    TypeConverter.WriteValueNotNull(writer, context, type);
+                    TypeConverter.WriteType(writer, context, type);
                 }
                 else
                 {
                     writer.Write(Constants.BC_LIST_FIXED);
-                    TypeConverter.WriteValueNotNull(writer, context, type);
+                    TypeConverter.WriteType(writer, context, type);
                     IntConverter.WriteInt(writer, context, array.Length);
                 }
                 itemConverter = AutoConverter.GetConverter(elementType);

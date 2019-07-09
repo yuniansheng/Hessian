@@ -28,7 +28,7 @@ namespace Hessian.IO.Converters
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:
-                        return BoolConverter;
+                        return GetConverter<BoolConverter>();
                     case TypeCode.Byte:
                     case TypeCode.SByte:
                     case TypeCode.Int16:
@@ -38,14 +38,14 @@ namespace Hessian.IO.Converters
                         return IntConverter;
                     case TypeCode.Double:
                     case TypeCode.Single:
-                        return DoubleConverter;
+                        return GetConverter<DoubleConverter>();
                     case TypeCode.Int64:
                     case TypeCode.UInt64:
-                        return LongConverter;
+                        return GetConverter<LongConverter>();
                     case TypeCode.Char:
                         return StringConverter;
                     default:
-                        return ObjectConverter;
+                        return GetConverter<ObjectConverter>();
                 }
             }
             else if (type == typeof(string))
@@ -54,15 +54,15 @@ namespace Hessian.IO.Converters
             }
             else if (type == typeof(DateTime))
             {
-                return DateTimeConverter;
+                return GetConverter<DateTimeConverter>();
             }
             else if (type.IsArray)
             {
-                return ArrayConverter;
+                return GetConverter<ArrayConverter>();
             }
             else if (type.IsEnum)
             {
-                return EnumConverter;
+                return GetConverter<EnumConverter>();
             }
             else if (type.FullName == "System.RuntimeType")
             {
@@ -70,15 +70,15 @@ namespace Hessian.IO.Converters
             }
             else if (ListConverter.IsList(type))
             {
-                return ListConverter;
+                return GetConverter<ListConverter>();
             }
             else if (MapConverter.IsMap(type))
             {
-                return MapConverter;
+                return GetConverter<MapConverter>();
             }
             else
             {
-                return ObjectConverter;
+                return GetConverter<ObjectConverter>();
             }
         }
     }
