@@ -8,9 +8,34 @@ namespace Hessian.IO.Converters
 {
     public class AutoConverter : HessianConverter
     {
+        public override bool CanRead(byte initialOctet)
+        {
+            return true;
+        }
+
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
-            throw new NotImplementedException();
+            var initialOctet = reader.ReadByte();
+            if (initialOctet == Constants.BC_NULL)
+            {
+                return null;
+            }
+
+            HessianConverter converter = null;
+            if (GetConverter<BinaryConverter>().CanRead(initialOctet))
+            {
+                converter = GetConverter<BinaryConverter>();
+            }
+            else if (GetConverter<BoolConverter>().CanRead(initialOctet))
+            {
+                converter = GetConverter<BoolConverter>();
+            }
+            else if (GetConverter<DateTimeConverter>().CanRead(initialOctet))
+            {
+                converter = GetConverter<DateTimeConverter>();
+            }
+
+            return converter.ReadValue(reader, context, objectType, initialOctet);
         }
 
         public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)

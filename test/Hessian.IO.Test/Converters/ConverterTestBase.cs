@@ -45,5 +45,14 @@ namespace Hessian.IO.Test.Converters
             }
             return new HessianSerializer().Serialize(value).ToHexString();
         }
+
+        public Stream S(object value)
+        {
+            var serializer = new HessianSerializer();
+            var stream = new MemoryStream();
+            serializer.Serialize(stream, value);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
     }
 }

@@ -9,9 +9,32 @@ namespace Hessian.IO.Converters
     {
         public DateTime BeginDate { get; set; } = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
+        public override bool CanRead(byte initialOctet)
+        {
+            return initialOctet == Constants.BC_DATE || initialOctet == Constants.BC_DATE_MINUTE;
+        }
+
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
+        }
+
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        {
+            if (initialOctet == Constants.BC_DATE)
+            {
+                var timeStamp = reader.ReadInt64();
+                return BeginDate.AddTicks(timeStamp * 10000);
+            }
+            else if (initialOctet == Constants.BC_DATE_MINUTE)
+            {
+                var minutes = reader.ReadInt32();
+                return BeginDate.AddMinutes(minutes);
+            }
+            else
+            {
+                throw Exceptions.UnExpectedInitialOctet(this, initialOctet);
+            }
         }
 
         public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)

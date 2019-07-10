@@ -7,9 +7,30 @@ namespace Hessian.IO.Converters
 {
     public class BoolConverter : HessianConverter
     {
+        public override bool CanRead(byte initialOctet)
+        {
+            return initialOctet == Constants.BC_TRUE || initialOctet == Constants.BC_FALSE;
+        }
+
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
+        }
+
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        {
+            if (initialOctet == Constants.BC_TRUE)
+            {
+                return true;
+            }
+            else if (initialOctet == Constants.BC_FALSE)
+            {
+                return false;
+            }
+            else
+            {
+                throw Exceptions.UnExpectedInitialOctet(this, initialOctet);
+            }
         }
 
         public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)

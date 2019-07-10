@@ -28,7 +28,14 @@ namespace Hessian.IO.Converters
             return (T)converter;
         }
 
+        public virtual bool CanRead(byte initialOctet)
+        {
+            return true;
+        }
+
         public abstract object ReadValue(HessianReader reader, HessianContext context, Type objectType);
+
+        public virtual object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet) { return null; }
 
         public void WriteValue(HessianWriter writer, HessianContext context, object value)
         {

@@ -17,9 +17,22 @@ namespace Hessian.IO
             _context = new HessianContext();
         }
 
-        public void DeSerialize(Stream stream)
+        public object DeSerialize(Stream stream)
         {
+            return DeSerialize(stream, null);
+        }
 
+        public T DeSerialize<T>(Stream stream)
+        {
+            return (T)DeSerialize(stream, typeof(T));
+        }
+
+        public object DeSerialize(Stream stream, Type type)
+        {
+            using (var reader = new HessianReader(stream))
+            {
+                return HessianConverter.AutoConverter.ReadValue(reader, _context, type);
+            }
         }
 
         public void Serialize(Stream stream, object value)
