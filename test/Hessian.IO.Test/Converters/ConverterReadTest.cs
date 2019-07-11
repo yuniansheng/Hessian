@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hessian.IO.Converters;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
@@ -54,7 +55,7 @@ namespace Hessian.IO.Test.Converters
         [InlineData(32767d)]
         [InlineData(12.5d)]
         [InlineData(12.123d)]
-        public void WriteDouble(double value)
+        public void ReadDouble(double value)
         {
             var result = (double)Serializer.DeSerialize(S(value));
             Assert.Equal(value, result);
@@ -72,7 +73,7 @@ namespace Hessian.IO.Test.Converters
         [InlineData(262143)]
         [InlineData(int.MinValue)]
         [InlineData(int.MaxValue)]
-        public void WriteInt(int value)
+        public void ReadInt(int value)
         {
             var result = (int)Serializer.DeSerialize(S(value));
             Assert.Equal(value, result);
@@ -89,7 +90,7 @@ namespace Hessian.IO.Test.Converters
         [InlineData((long)int.MaxValue)]
         [InlineData(long.MinValue)]
         [InlineData(long.MaxValue)]
-        public void WriteLong(long value)
+        public void ReadLong(long value)
         {
             var result = (long)Serializer.DeSerialize(S(value));
             Assert.Equal(value, result);
@@ -101,10 +102,26 @@ namespace Hessian.IO.Test.Converters
         [InlineData(1023)]
         [InlineData(1024 * 4)]
         [InlineData(1024 * 4 + 31)]
-        public void WriteString(int len)
+        public void ReadString(int len)
         {
             var result = (string)Serializer.DeSerialize(S(new string('a', len)));
             Assert.Equal(len, result.Length);
+        }
+
+        [Fact]
+        public void ReadType()
+        {
+            var stream = S(typeof(string));
+            var result = HessianConverter.TypeConverter.ReadValue(new HessianReader(stream), new HessianContext(), null);
+            Assert.Equal(typeof(string), result);
+
+            stream = S(typeof(string[]));
+            result = HessianConverter.TypeConverter.ReadValue(new HessianReader(stream), new HessianContext(), null);
+            Assert.Equal(typeof(string[]), result);
+
+            stream = S(typeof(List<string>));
+            result = HessianConverter.TypeConverter.ReadValue(new HessianReader(stream), new HessianContext(), null);
+            Assert.Equal(typeof(List<string>), result);
         }
 
         private void AssertLengthAndItemValue<T>(ICollection<T> collection, int length, T value)

@@ -7,9 +7,29 @@ namespace Hessian.IO.Converters
 {
     public class TypeConverter : HessianConverter
     {
-        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
+        public override bool CanRead(byte initialOctet)
         {
-            throw new NotImplementedException();
+            return StringConverter.CanRead(initialOctet) || IntConverter.CanRead(initialOctet);
+        }
+
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        {
+            if (StringConverter.CanRead(initialOctet))
+            {
+                var typeName = (string)StringConverter.ReadValue(reader, context, typeof(string), initialOctet);
+                var type = GetType(typeName);
+                context.ClassRefs.AddItem(type);
+                return type;
+            }
+            else if (IntConverter.CanRead(initialOctet))
+            {
+                var typeIndex = (int)IntConverter.ReadValue(reader, context, typeof(int), initialOctet);
+                return context.ClassRefs.GetItem(typeIndex);
+            }
+            else
+            {
+                throw Exceptions.UnExpectedInitialOctet(this, initialOctet);
+            }
         }
 
         public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)
@@ -80,6 +100,38 @@ namespace Hessian.IO.Converters
                 }
             }
             return type.ToString();
+        }
+
+        private Type GetType(string typeName)
+        {
+            if (typeName.StartsWith("["))
+            {
+                switch (typeName)
+                {
+                    case "[boolean":
+                        return typeof(bool[]);
+                    case "[short":
+                        return typeof(short[]);
+                    case "[int":
+                        return typeof(int[]);
+                    case "[double":
+                        return typeof(double[]);
+                    case "[float":
+                        return typeof(float[]);
+                    case "[long":
+                        return typeof(long[]);
+                    case "[string":
+                        return typeof(string[]);
+                    default:
+                        typeName = typeName.TrimStart('[');
+                        var type = Type.GetType(typeName);
+                        return type.MakeArrayType();
+                }
+            }
+            else
+            {
+                return Type.GetType(typeName);
+            }
         }
     }
 }

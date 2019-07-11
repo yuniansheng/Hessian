@@ -47,7 +47,16 @@ namespace Hessian.IO.Converters
             return false;
         }
 
-        public abstract object ReadValue(HessianReader reader, HessianContext context, Type objectType);
+        public virtual object ReadValue(HessianReader reader, HessianContext context, Type objectType)
+        {
+            var initialOctet = reader.ReadByte();
+            if (initialOctet == Constants.BC_NULL)
+            {
+                return null;
+            }
+
+            return ReadValue(reader, context, objectType, initialOctet);
+        }
 
         public virtual object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet) { return null; }
 
