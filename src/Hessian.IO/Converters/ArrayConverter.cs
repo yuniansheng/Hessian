@@ -9,9 +9,56 @@ namespace Hessian.IO.Converters
 {
     public class ArrayConverter : ValueRefConverterBase
     {
-        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
+        public override bool CanRead(byte initialOctet)
         {
-            throw new NotImplementedException();
+            return (0x70 <= initialOctet && initialOctet <= 0x7f) ||
+                (Constants.BC_LIST_FIXED_UNTYPED == initialOctet || Constants.BC_LIST_FIXED == initialOctet);
+        }
+
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        {
+            int len = 0;
+            Type elementType = null;
+            if (0x70 <= initialOctet && initialOctet <= 0x77)
+            {
+                elementType = ((Type)TypeConverter.ReadValue(reader, context, null)).GetElementType();
+                len = initialOctet - 0x70;
+            }
+            else if (0x78 <= initialOctet && initialOctet <= 0x7f)
+            {
+                elementType = typeof(object);
+                len = initialOctet - 0x78;
+            }
+            else if (Constants.BC_LIST_FIXED_UNTYPED == initialOctet)
+            {
+                elementType = typeof(object);
+                len = (int)IntConverter.ReadValue(reader, context, typeof(int));
+            }
+            else if (Constants.BC_LIST_FIXED == initialOctet)
+            {
+                elementType = ((Type)TypeConverter.ReadValue(reader, context, null)).GetElementType();
+                len = (int)IntConverter.ReadValue(reader, context, typeof(int));
+            }
+
+            var array = Array.CreateInstance(elementType, len);
+            context.ValueRefs.AddItem(array);
+
+            HessianConverter itemConverter = null;
+            if (elementType == typeof(object))
+            {
+                itemConverter = AutoConverter;
+            }
+            else
+            {
+                itemConverter = AutoConverter.GetConverter(elementType);
+            }
+
+            for (int i = 0; i < len; i++)
+            {
+                var item = itemConverter.ReadValue(reader, context, elementType);
+                array.SetValue(item, i);
+            }
+            return array;
         }
 
         public override void WriteValueNotExisted(HessianWriter writer, HessianContext context, object value)

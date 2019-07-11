@@ -15,11 +15,6 @@ namespace Hessian.IO.Converters
                 Constants.BC_INT == initialOctet;
         }
 
-        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
-        {
-            throw new NotImplementedException();
-        }
-
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
         {
             if (0x80 <= initialOctet && initialOctet <= 0xbf)

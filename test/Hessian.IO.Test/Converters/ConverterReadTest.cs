@@ -96,6 +96,30 @@ namespace Hessian.IO.Test.Converters
             Assert.Equal(value, result);
         }
 
+        [Fact]
+        public void ReadArray()
+        {
+            //fixed-length list
+            var fixedList = new string[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
+            fixedList = (string[])Serializer.DeSerialize(S(fixedList));
+            AssertLengthAndItemValue(fixedList, 8, "ab");
+
+            //fixed-length short list
+            var fixedShortList = new string[] { "ab", "ab" };
+            fixedShortList = (string[])Serializer.DeSerialize(S(fixedShortList));
+            AssertLengthAndItemValue(fixedShortList, 2, "ab");
+
+            //fixed-length untyped list
+            var fixedUntypedList = new object[] { "ab", "ab", "ab", "ab", "ab", "ab", "ab", "ab" };
+            fixedUntypedList = (object[])Serializer.DeSerialize(S(fixedUntypedList));
+            AssertLengthAndItemValue(fixedUntypedList, 8, "ab");
+
+            //fixed-length short list
+            var fixedUntypedShortList = new object[] { "ab", "ab" };
+            fixedUntypedShortList = (object[])Serializer.DeSerialize(S(fixedUntypedShortList));
+            AssertLengthAndItemValue(fixedUntypedShortList, 2, "ab");
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(31)]

@@ -14,11 +14,6 @@ namespace Hessian.IO.Converters
                  (Constants.BC_STRING_CHUNK == initialOctet || Constants.BC_STRING == initialOctet);
         }
 
-        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
-        {
-            throw new NotImplementedException();
-        }
-
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
         {
             var builder = new StringBuilder();
