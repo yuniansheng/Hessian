@@ -21,21 +21,15 @@ namespace Hessian.IO.Converters
                 return null;
             }
 
-            HessianConverter converter = null;
-            if (GetConverter<BinaryConverter>().CanRead(initialOctet))
+            foreach (var converter in ConverterCache.Values)
             {
-                converter = GetConverter<BinaryConverter>();
-            }
-            else if (GetConverter<BoolConverter>().CanRead(initialOctet))
-            {
-                converter = GetConverter<BoolConverter>();
-            }
-            else if (GetConverter<DateTimeConverter>().CanRead(initialOctet))
-            {
-                converter = GetConverter<DateTimeConverter>();
+                if (converter != this && converter.CanRead(initialOctet))
+                {
+                    return converter.ReadValue(reader, context, objectType, initialOctet);
+                }
             }
 
-            return converter.ReadValue(reader, context, objectType, initialOctet);
+            throw Exceptions.UnExpectedInitialOctet(this, initialOctet);
         }
 
         public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)

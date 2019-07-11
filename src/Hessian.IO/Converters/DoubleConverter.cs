@@ -7,9 +7,48 @@ namespace Hessian.IO.Converters
 {
     public class DoubleConverter : HessianConverter
     {
+        public override bool CanRead(byte initialOctet)
+        {
+            return initialOctet == Constants.BC_DOUBLE_ZERO || initialOctet == Constants.BC_DOUBLE_ONE ||
+                initialOctet == Constants.BC_DOUBLE_BYTE || initialOctet == Constants.BC_DOUBLE_SHORT ||
+                initialOctet == Constants.BC_DOUBLE_MILL || initialOctet == Constants.BC_DOUBLE;
+        }
+
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
+        }
+
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        {
+            if (initialOctet == Constants.BC_DOUBLE_ZERO)
+            {
+                return 0d;
+            }
+            else if (initialOctet == Constants.BC_DOUBLE_ONE)
+            {
+                return 1d;
+            }
+            else if (initialOctet == Constants.BC_DOUBLE_BYTE)
+            {
+                return (double)reader.ReadSByte();
+            }
+            else if (initialOctet == Constants.BC_DOUBLE_SHORT)
+            {
+                return (double)reader.ReadInt16();
+            }
+            else if (initialOctet == Constants.BC_DOUBLE_MILL)
+            {
+                return reader.ReadInt32() / 1000.0d;
+            }
+            else if (initialOctet == Constants.BC_DOUBLE)
+            {
+                return reader.ReadDouble();
+            }
+            else
+            {
+                throw Exceptions.UnExpectedInitialOctet(this, initialOctet);
+            }
         }
 
         public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)

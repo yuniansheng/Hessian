@@ -7,9 +7,43 @@ namespace Hessian.IO.Converters
 {
     public class IntConverter : HessianConverter
     {
+        public override bool CanRead(byte initialOctet)
+        {
+            return (0x80 <= initialOctet && initialOctet <= 0xbf) ||
+                (0xc0 <= initialOctet && initialOctet <= 0xcf) ||
+                (0xd0 <= initialOctet && initialOctet <= 0xd7) ||
+                Constants.BC_INT == initialOctet;
+        }
+
         public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
         {
             throw new NotImplementedException();
+        }
+
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        {
+            if (0x80 <= initialOctet && initialOctet <= 0xbf)
+            {
+                return initialOctet - 0x90;
+            }
+            else if (0xc0 <= initialOctet && initialOctet <= 0xcf)
+            {
+                var b0 = reader.ReadByte();
+                return ((initialOctet - 0xc8) << 8) + b0;
+            }
+            else if (0xd0 <= initialOctet && initialOctet <= 0xd7)
+            {
+                var s = reader.ReadUInt16();
+                return ((initialOctet - 0xd4) << 16) + s;
+            }
+            else if (Constants.BC_INT == initialOctet)
+            {
+                return reader.ReadInt32();
+            }
+            else
+            {
+                throw Exceptions.UnExpectedInitialOctet(this, initialOctet);
+            }
         }
 
         public override void WriteValueNotNull(HessianWriter writer, HessianContext context, object value)

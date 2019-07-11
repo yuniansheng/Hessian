@@ -2,13 +2,27 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Hessian.IO.Converters
 {
     public abstract class HessianConverter
     {
-        private static Dictionary<Type, HessianConverter> ConverterCache = new Dictionary<Type, HessianConverter>();
+        protected static Dictionary<Type, HessianConverter> ConverterCache = new Dictionary<Type, HessianConverter>();
+
+        static HessianConverter()
+        {
+            var types = Assembly.GetAssembly(typeof(HessianConverter)).GetTypes()
+                .Where(t => !t.IsAbstract && typeof(HessianConverter).IsAssignableFrom(t));
+
+            foreach (var t in types)
+            {
+                var converter = (HessianConverter)Activator.CreateInstance(t);
+                ConverterCache.Add(t, converter);
+            }
+        }
 
         public static IntConverter IntConverter => GetConverter<IntConverter>();
         public static StringConverter StringConverter => GetConverter<StringConverter>();
@@ -30,7 +44,7 @@ namespace Hessian.IO.Converters
 
         public virtual bool CanRead(byte initialOctet)
         {
-            return true;
+            return false;
         }
 
         public abstract object ReadValue(HessianReader reader, HessianContext context, Type objectType);

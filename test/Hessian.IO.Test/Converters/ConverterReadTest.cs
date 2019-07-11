@@ -45,6 +45,68 @@ namespace Hessian.IO.Test.Converters
             Assert.Equal(value, result);
         }
 
+        [Theory]
+        [InlineData(0d)]
+        [InlineData(1d)]
+        [InlineData(-128d)]
+        [InlineData(127d)]
+        [InlineData(32768d)]
+        [InlineData(32767d)]
+        [InlineData(12.5d)]
+        [InlineData(12.123d)]
+        public void WriteDouble(double value)
+        {
+            var result = (double)Serializer.DeSerialize(S(value));
+            Assert.Equal(value, result);
+        }
+
+        [Theory]
+        [InlineData(-16)]
+        [InlineData(1)]
+        [InlineData(16)]
+        [InlineData(256)]
+        [InlineData(47)]
+        [InlineData(-2048)]
+        [InlineData(2047)]
+        [InlineData(-262144)]
+        [InlineData(262143)]
+        [InlineData(int.MinValue)]
+        [InlineData(int.MaxValue)]
+        public void WriteInt(int value)
+        {
+            var result = (int)Serializer.DeSerialize(S(value));
+            Assert.Equal(value, result);
+        }
+
+        [Theory]
+        [InlineData(-8L)]
+        [InlineData(15L)]
+        [InlineData(-2048L)]
+        [InlineData(2047L)]
+        [InlineData(-262144L)]
+        [InlineData(262143L)]
+        [InlineData((long)int.MinValue)]
+        [InlineData((long)int.MaxValue)]
+        [InlineData(long.MinValue)]
+        [InlineData(long.MaxValue)]
+        public void WriteLong(long value)
+        {
+            var result = (long)Serializer.DeSerialize(S(value));
+            Assert.Equal(value, result);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(31)]
+        [InlineData(1023)]
+        [InlineData(1024 * 4)]
+        [InlineData(1024 * 4 + 31)]
+        public void WriteString(int len)
+        {
+            var result = (string)Serializer.DeSerialize(S(new string('a', len)));
+            Assert.Equal(len, result.Length);
+        }
+
         private void AssertLengthAndItemValue<T>(ICollection<T> collection, int length, T value)
         {
             Assert.Equal(length, collection.Count);
