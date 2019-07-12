@@ -27,5 +27,17 @@ namespace Hessian.IO.Test
             }
             return builder.ToString();
         }
+
+        public static Stream ToStream(this string hexString)
+        {
+            var stream = new MemoryStream(hexString.Length / 3);
+            for (int i = 0; i < stream.Capacity; i++)
+            {
+                var b = byte.Parse(hexString.Substring(i * 3 + 1, 2), System.Globalization.NumberStyles.HexNumber);
+                stream.WriteByte(b);
+            }
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
     }
 }

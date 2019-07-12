@@ -37,7 +37,7 @@ namespace Hessian.IO
 
         public void Serialize(Stream stream, object value)
         {
-            using (var writer = new HessianWriter(stream, new UTF8Encoding(false, true), true))
+            using (var writer = new HessianWriter(stream))
             {
                 HessianConverter.AutoConverter.WriteValue(writer, _context, value);
                 if (AutoReset)

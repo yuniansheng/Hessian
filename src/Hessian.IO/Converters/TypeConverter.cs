@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace Hessian.IO.Converters
@@ -18,13 +19,13 @@ namespace Hessian.IO.Converters
             {
                 var typeName = (string)StringConverter.ReadValue(reader, context, typeof(string), initialOctet);
                 var type = GetType(typeName);
-                context.ClassRefs.AddItem(type);
+                context.TypeRefs.AddItem(type);
                 return type;
             }
             else if (IntConverter.CanRead(initialOctet))
             {
                 var typeIndex = (int)IntConverter.ReadValue(reader, context, typeof(int), initialOctet);
-                return context.ClassRefs.GetItem(typeIndex);
+                return context.TypeRefs.GetItem(typeIndex);
             }
             else
             {
@@ -94,6 +95,10 @@ namespace Hessian.IO.Converters
                 {
                     return "[string";
                 }
+                else if (elementType == typeof(object))
+                {
+                    return "[object";
+                }
                 else
                 {
                     return "[" + elementType.ToString();
@@ -122,16 +127,67 @@ namespace Hessian.IO.Converters
                         return typeof(long[]);
                     case "[string":
                         return typeof(string[]);
+                    case "[object":
+                        return typeof(object[]);
                     default:
                         typeName = typeName.TrimStart('[');
-                        var type = Type.GetType(typeName);
+                        var type = FindTypeInCurrentDomain(typeName);
                         return type.MakeArrayType();
                 }
             }
             else
             {
-                return Type.GetType(typeName);
+                return FindTypeInCurrentDomain(typeName);
             }
+        }
+
+        internal static Type FindTypeInCurrentDomain(string typeName)
+        {
+            Type type = null;
+
+            //如果该类型已经装载
+            type = Type.GetType(typeName);
+            if (type != null)
+            {
+                return type;
+            }
+
+            //在EntryAssembly中查找
+            if (Assembly.GetEntryAssembly() != null)
+            {
+                type = Assembly.GetEntryAssembly().GetType(typeName);
+                if (type != null)
+                {
+                    return type;
+                }
+            }
+
+            //在CurrentDomain的所有Assembly中查找
+            Assembly[] assemblyArray = AppDomain.CurrentDomain.GetAssemblies();
+            int assemblyArrayLength = assemblyArray.Length;
+            for (int i = 0; i < assemblyArrayLength; ++i)
+            {
+                type = assemblyArray[i].GetType(typeName);
+                if (type != null)
+                {
+                    return type;
+                }
+            }
+
+            for (int i = 0; (i < assemblyArrayLength); ++i)
+            {
+                Type[] typeArray = assemblyArray[i].GetTypes();
+                int typeArrayLength = typeArray.Length;
+                for (int j = 0; j < typeArrayLength; ++j)
+                {
+                    if (typeArray[j].Name.Equals(typeName))
+                    {
+                        return typeArray[j];
+                    }
+                }
+            }
+
+            return type;
         }
     }
 }

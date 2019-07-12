@@ -25,27 +25,20 @@ namespace Hessian.IO
         private bool m_isMemoryStream; // "do we sit on MemoryStream?" for Read/ReadInt32 perf
         private bool m_leaveOpen;
 
-        public HessianReader(Stream input) : this(input, new UTF8Encoding(), false)
+        public HessianReader(Stream input) : this(input, true)
         {
         }
 
-        public HessianReader(Stream input, Encoding encoding) : this(input, encoding, false)
-        {
-        }
-
-        public HessianReader(Stream input, Encoding encoding, bool leaveOpen)
+        public HessianReader(Stream input, bool leaveOpen)
         {
             if (input == null)
             {
                 throw new ArgumentNullException("input");
             }
-            if (encoding == null)
-            {
-                throw new ArgumentNullException("encoding");
-            }
             if (!input.CanRead)
                 throw new ArgumentException("Argument_StreamNotReadable");
             Contract.EndContractBlock();
+            Encoding encoding = new UTF8Encoding(false, true);
             m_stream = input;
             m_decoder = encoding.GetDecoder();
             m_maxCharsSize = encoding.GetMaxCharCount(MaxCharBytesSize);

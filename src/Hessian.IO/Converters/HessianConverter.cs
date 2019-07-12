@@ -27,6 +27,7 @@ namespace Hessian.IO.Converters
         public static IntConverter IntConverter => GetConverter<IntConverter>();
         public static StringConverter StringConverter => GetConverter<StringConverter>();
         public static TypeConverter TypeConverter => GetConverter<TypeConverter>();
+        public static ClassDefinitionConverter ClassDefinitionConverter => GetConverter<ClassDefinitionConverter>();        
         public static AutoConverter AutoConverter => GetConverter<AutoConverter>();
 
         public static T GetConverter<T>() where T : HessianConverter
@@ -60,7 +61,7 @@ namespace Hessian.IO.Converters
 
         public virtual object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet) { return null; }
 
-        public void WriteValue(HessianWriter writer, HessianContext context, object value)
+        public virtual void WriteValue(HessianWriter writer, HessianContext context, object value)
         {
             if (value == null)
             {

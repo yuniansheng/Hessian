@@ -13,17 +13,17 @@ namespace Hessian.IO.Converters
             return true;
         }
 
-        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
+        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
         {
-            var initialOctet = reader.ReadByte();
-            if (initialOctet == Constants.BC_NULL)
+            if (Constants.BC_REF == initialOctet)
             {
-                return null;
+                var index = (int)IntConverter.ReadValue(reader, context, typeof(int));
+                return context.ValueRefs.GetItem(index);
             }
 
             foreach (var converter in ConverterCache.Values)
             {
-                if (converter != this && converter.CanRead(initialOctet))
+                if (converter != this && !(converter is ClassDefinitionConverter) && converter.CanRead(initialOctet))
                 {
                     return converter.ReadValue(reader, context, objectType, initialOctet);
                 }
@@ -78,10 +78,6 @@ namespace Hessian.IO.Converters
             else if (type.IsArray)
             {
                 return GetConverter<ArrayConverter>();
-            }
-            else if (type.IsEnum)
-            {
-                return GetConverter<EnumConverter>();
             }
             else if (type.FullName == "System.RuntimeType")
             {

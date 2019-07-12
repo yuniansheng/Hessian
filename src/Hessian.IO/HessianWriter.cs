@@ -35,28 +35,23 @@ namespace Hessian.IO
             _buffer = new byte[16];
             _encoding = new UTF8Encoding(false, true);
             _encoder = _encoding.GetEncoder();
+            _leaveOpen = true;
         }
 
-        public HessianWriter(Stream output) : this(output, new UTF8Encoding(false, true), false)
+        public HessianWriter(Stream output) : this(output, true)
         {
         }
 
-        public HessianWriter(Stream output, Encoding encoding) : this(output, encoding, false)
-        {
-        }
-
-        public HessianWriter(Stream output, Encoding encoding, bool leaveOpen)
+        public HessianWriter(Stream output, bool leaveOpen)
         {
             if (output == null)
                 throw new ArgumentNullException(nameof(output));
-            if (encoding == null)
-                throw new ArgumentNullException(nameof(encoding));
             if (!output.CanWrite)
                 throw new ArgumentException("StreamNotWritable", nameof(output));
 
             OutStream = output;
             _buffer = new byte[16];
-            _encoding = encoding;
+            _encoding = new UTF8Encoding(false, true);
             _encoder = _encoding.GetEncoder();
             _leaveOpen = leaveOpen;
         }

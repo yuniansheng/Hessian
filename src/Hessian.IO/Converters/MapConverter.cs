@@ -10,9 +10,32 @@ namespace Hessian.IO.Converters
 {
     public class MapConverter : ValueRefConverterBase
     {
-        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType)
+        public override bool CanRead(byte initialOctet)
         {
-            throw new NotImplementedException();
+            return Constants.BC_MAP_UNTYPED == initialOctet || base.CanRead(initialOctet);
+        }
+
+        public override object ReadValueNotExisted(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        {
+            if (Constants.BC_MAP_UNTYPED == initialOctet)
+            {
+                var dict = new Dictionary<object, object>();
+                context.ValueRefs.AddItem(dict);
+
+                initialOctet = reader.ReadByte();
+                while (Constants.BC_END != initialOctet)
+                {
+                    var key = AutoConverter.ReadValue(reader, context, typeof(object), initialOctet);
+                    var value = AutoConverter.ReadValue(reader, context, typeof(object));
+                    dict.Add(key, value);
+                    initialOctet = reader.ReadByte();
+                }
+                return dict;
+            }
+            else
+            {
+                throw Exceptions.UnExpectedInitialOctet(this, initialOctet);
+            }
         }
 
         public override void WriteValueNotExisted(HessianWriter writer, HessianContext context, object value)

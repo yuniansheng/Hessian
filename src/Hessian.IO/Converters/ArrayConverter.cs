@@ -12,10 +12,11 @@ namespace Hessian.IO.Converters
         public override bool CanRead(byte initialOctet)
         {
             return (0x70 <= initialOctet && initialOctet <= 0x7f) ||
-                (Constants.BC_LIST_FIXED_UNTYPED == initialOctet || Constants.BC_LIST_FIXED == initialOctet);
+                (Constants.BC_LIST_FIXED_UNTYPED == initialOctet || Constants.BC_LIST_FIXED == initialOctet) ||
+                base.CanRead(initialOctet);
         }
 
-        public override object ReadValue(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
+        public override object ReadValueNotExisted(HessianReader reader, HessianContext context, Type objectType, byte initialOctet)
         {
             int len = 0;
             Type elementType = null;

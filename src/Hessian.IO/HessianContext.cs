@@ -8,7 +8,7 @@ namespace Hessian.IO
     public class HessianContext
     {
         public ReferenceMap<Type> TypeRefs { get; set; } = new ReferenceMap<Type>();
-        public ReferenceMap<Type> ClassRefs { get; set; } = new ReferenceMap<Type>();
+        public ReferenceMap<ClassDefinition> ClassRefs { get; set; } = new ReferenceMap<ClassDefinition>();
         public ReferenceMap<object> ValueRefs { get; set; } = new ReferenceMap<object>();
 
         public HessianContext()
@@ -19,6 +19,7 @@ namespace Hessian.IO
         {
             TypeRefs.Clear();
             ClassRefs.Clear();
+            ValueRefs.Clear();
         }
     }
 }
